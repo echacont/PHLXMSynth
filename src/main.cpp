@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "FLXMSynth.h"
+#include "PHLXM.h"
 
 
 
