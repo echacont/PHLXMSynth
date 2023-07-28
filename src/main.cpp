@@ -1,14 +1,18 @@
 #include <Arduino.h>
-
 #include "defines.h"
 #include "PHLXM.h"
 
+PHLXM* phlxm = NULL;
 
-// construct top system object
-PHLXM phlxm();
+void setup() 
+{
+  phlxm = new PHLXM();
+}
 
-void setup () {};
-void loop  () {};
+void loop() 
+{
+  phlxm->run();
+};
 
 /*
 void changeProgram(int program) 

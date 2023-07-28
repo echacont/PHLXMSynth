@@ -1,5 +1,5 @@
 // echacont
-// FLXMSynth_seq header file
+// PHLXM header file
 
 #ifndef FLXMSYNTH_SEQ_H
 #define FLXMSYNTH_SEQ_H
@@ -12,22 +12,25 @@
 #include <Fluxamasynth.h>
 
 // controller
-class controller
+class Controller
 {
   private:
   potStatus_t potStatus, potStatus_prev;
   buttonStatus_t buttonStatus, buttonStatus_prev;
+  public:
+  // constructor
+  Controller(void);
   // update values and return true if there was a change
   bool update(void);
 };
 
-// sequencer control the synth
-// so it inherits Fluxamasynth
-class sequencer : private Fluxamasynth
+// sequencer control the synth so it 
+// derives from Fluxamasynth
+class Sequencer : private Fluxamasynth
 {
   private:
-  const int ticksPerBeat    = 4;
-  const int baseTempo       = 60;
+  int ticksPerBeat    = 4;
+  int baseTempo       = 60;
   int voices = 8;
   int spread = 420;
   int panspread = 20;
@@ -36,37 +39,52 @@ class sequencer : private Fluxamasynth
   step_t seq[NUM_STEPS0];
   // sequencer
   Fluxamasynth synth;
+  public:
+  // constructor
+  Sequencer(void);
 };
 
 // LCD display
 // inherits LiquidCrystal_I2C 
-class lcdisp : private LiquidCrystal_I2C
+class Lcdisp : private LiquidCrystal_I2C
 {
   private:
   LiquidCrystal_I2C lcd;
-    //PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE
-  
+  public:
+  Lcdisp(void);
   void update(void);
 };
 
+class Leds
+{
+  private:
+  ledStatus_t leds;
+  public:
+  Leds(void);
+  void greenLed(bool);
+  void redLed(bool);
+};
+
 // PHLXM - top system class
-// inherits Fluxamasynth, LiquidCrystal_I2C classes
+// derives Fluxamasynth, LiquidCrystal_I2C classes
 class PHLXM
 {
   private:
   mode_e mode;
   transport_e trans;
   // controller
-  controller contrl;
+  Controller contrl;
   // sequencer
-  sequencer sq;
-  // synthesizer
-  
+  Sequencer sq;
   // LCD
-  lcdisp disp;
+  Lcdisp disp;
+
+
 
   public:
+  Leds leds;
   PHLXM(void);
+
 
 };
 

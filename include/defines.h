@@ -11,6 +11,7 @@
 #define PIN_CONTINUE_INPUT  3
 #define NUM_POTS            2
 #define NUM_BUTTONS         3
+#define NUM_LEDS            2
 // LCD
 #define COLUMS              20   //LCD columns
 #define ROWS                2    //LCD rows
@@ -52,5 +53,11 @@ struct step {
 };
 
 typedef struct step step_t;
+
+struct ledStatus {
+  bool status[NUM_LEDS];
+};
+
+typedef struct ledStatus ledStatus_t;
 
 #endif // DEFINES_H
