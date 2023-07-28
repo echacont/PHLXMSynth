@@ -35,6 +35,7 @@ typedef struct buttonStatus buttonStatus_t;
 struct step {
   int nextStep;
   bool enable;
+  int gate;
   note_t notes[];
 };
 
@@ -70,18 +71,20 @@ int scale1[7] = {2, 1, 2, 2, 2, 1, 2};     // minor scale
 Fluxamasynth synth;
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
-
-// create FLXMSynth object
-class FLXMSynth 
+// controller
+class controller
 {
   private:
-  // controller
-  enum mode_e { PC, MODE, FX } mode = PC;
-  potStatus_t potStatus_new, potStatus_prev;
-  buttonStatus_t buttonStatus_new, buttonStatus_prev;
+  potStatus_t potStatus, potStatus_prev;
+  buttonStatus_t buttonStatus, buttonStatus_prev;
+  // update values and return true if there was a change
+  bool update(void);
+};
 
-
-  // sequencer
+// sequencer
+class sequencer 
+{
+  private:
   const int ticksPerBeat    = 4;
   const int baseTempo       = 60;
   int voices = 8;
@@ -90,13 +93,35 @@ class FLXMSynth
   int tempo;
   // step sequence
   step_t seq[NUM_STEPS0];
-  
-  // synthesizer
-  Fluxamasynth synth;
+};
 
-  // LCD
+// LCD display
+class lcdisp
+{
+  private:
   LiquidCrystal_I2C lcd;
     //PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE
+  
+  void update(void);
+};
+
+enum mode_e { PC, MODE, FX };
+enum transport_e { STOP, PLAY, PAUSE };
+
+// PHLXM - top system class
+class PHLXM
+{
+  private:
+  mode_e mode;
+  transport_e trans;
+  // controller
+  controller contrl;
+  // sequencer
+  sequencer sq;
+  // synthesizer
+  Fluxamasynth synth;
+  // LCD
+  lcdisp disp;
 
   public:
 
