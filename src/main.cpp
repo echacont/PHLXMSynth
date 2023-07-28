@@ -1,8 +1,6 @@
 #include <Arduino.h>
 
-
-#include "FLXMSynth_seq.h"
-
+#include "FLXMSynth.h"
 
 void changeProgram(int program) 
 {
@@ -163,13 +161,6 @@ void display(potStatus_t potStatus)
       }
     }
   }
-  // print sequencer TODO: only do if theres a change
-  //lcd.setCursor(10,1);
-  //lcd.print(steps0_p, HEX);
-  //lcd.print();
-  //lcd.write(LCD_SPACE_SYMBOL);
-  //lcd.print(currentTicks, HEX);
-  //lcd.write(LCD_SPACE_SYMBOL);
 }
 
 void setup() 

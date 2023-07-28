@@ -4,20 +4,7 @@
 #ifndef FLXMSYNTH_SEQ_H
 #define FLXMSYNTH_SEQ_H
 
-// MIDI_Shield
-#define PIN_LED_GRN         6
-#define PIN_LED_RED         7
-#define PIN_PLAY_INPUT      2
-#define PIN_CONTINUE_INPUT  3
-#define NUM_POTS            2
-// LCD
-#define COLUMS              20   //LCD columns
-#define ROWS                2    //LCD rows
-#define LCD_SPACE_SYMBOL    0x20 //space symbol from LCD ROM, see p.9 of GDM2004D datasheet
-#define LCD_NOTE1_SYMBOL    0x91
-// SEQUENCER
-#define NUM_STEPS0          16      
-#define TICKS_PER_STEP      4
+#include "defines.h"
 
 // constantes en memoria
 const int ticksPerBeat    = 4;
@@ -25,16 +12,33 @@ const int voices          = 8;
 const int spread          = 420;
 const int panspread       = 20;
 const int baseTempo       = 60;
+
 struct note {
   int pitch;
   int velocity;
 };
-typedef struct note note_t;
+
 struct potStatus {
   bool status[NUM_POTS];
-  int value[NUM_POTS];
+  int  value[NUM_POTS];
 };
+
+struct buttonStatus {
+  bool status[NUM_BUTTONS];
+  bool value[NUM_BUTTONS];
+};
+
+typedef struct note note_t;
 typedef struct potStatus potStatus_t;
+typedef struct buttonStatus buttonStatus_t;
+
+struct step {
+  int nextStep;
+  bool enable;
+  note_t notes[];
+};
+
+typedef struct step step_t;
 
 // state
 int mode = 0;
@@ -67,6 +71,35 @@ Fluxamasynth synth;
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
 
-void changeProgram(int program);
+// create FLXMSynth object
+class FLXMSynth 
+{
+  private:
+  // controller
+  enum mode_e { PC, MODE, FX } mode = PC;
+  potStatus_t potStatus_new, potStatus_prev;
+  buttonStatus_t buttonStatus_new, buttonStatus_prev;
+
+
+  // sequencer
+  const int ticksPerBeat    = 4;
+  const int baseTempo       = 60;
+  int voices = 8;
+  int spread = 420;
+  int panspread = 20;
+  int tempo;
+  // step sequence
+  step_t seq[NUM_STEPS0];
+  
+  // synthesizer
+  Fluxamasynth synth;
+
+  // LCD
+  LiquidCrystal_I2C lcd;
+    //PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE
+
+  public:
+
+};
 
 #endif //FLXMSYNTH_SEQ_H
