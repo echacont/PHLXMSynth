@@ -1,12 +1,16 @@
 #include <Arduino.h>
 
+#include "defines.h"
 #include "PHLXM.h"
 
 
+// construct top system object
+PHLXM phlxm();
 
+void setup () {};
+void loop  () {};
 
-
-
+/*
 void changeProgram(int program) 
 {
   if (program > 127) program = 127;
@@ -210,3 +214,4 @@ void loop() {
   display(potStatus_new);
 
 }
+*/
