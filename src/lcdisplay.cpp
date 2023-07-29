@@ -50,7 +50,7 @@ void Lcdisp::update(int value1, int value2, int value3)
   write(LCD_SPACE_SYMBOL);
 }
 
-void Lcdisp::update(Program program, controllerMode_t controlMode)
+void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode)
 {
   home();  
   switch(controlMode.mode)

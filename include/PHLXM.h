@@ -16,11 +16,11 @@ class Controller
   public:
   controllerStatus_t status, status_prev;
   controllerMode_t controlMode;
+  synthProgram_t program;
   // constructor
   Controller(void);
-  void updateController(void);    // see what input is being applied
-  void updateMode(Program program);          // with the input, what is being controlled?
-  controllerStatus_t updateController(controllerStatus_t status_prev);
+  void updateStatus(void);    // see what input is being applied
+  void updateControl();          // with the input, what is being controlled?
 };
 
 // PHLXM - top system class

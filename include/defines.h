@@ -53,7 +53,7 @@ struct controllerMode {
 }; 
 typedef struct controllerMode controllerMode_t;
 
-struct Program
+struct Program_s
 {
   int bank;
   int voiceProgram[NUM_UNISON_VOICES];
@@ -62,7 +62,8 @@ struct Program
   int masterVol;
   int chorus;
   int reverb;
-  Program(void);
+  bool update;
 };
+typedef struct Program_s synthProgram_t;
 
 #endif // DEFINES_H

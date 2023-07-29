@@ -52,7 +52,6 @@ class Sequencer : private Fluxamasynth
   int voices;
   int spread;
   int panspread;
-  Program currentProgram;
 
   // transport
   transport_e trans;
@@ -66,8 +65,7 @@ class Sequencer : private Fluxamasynth
   Sequencer(void);
   void tick(void);
   void initSequences(int root);
-  void progChange(void);
-  void progChange(Program program);
+  void progChange(synthProgram_t program);
   void playStep(int step);
 
 };

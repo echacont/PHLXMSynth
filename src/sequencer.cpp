@@ -28,7 +28,6 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   }
 
   initSequences(DEFAULT_ROOT);
-  progChange();
 }
 
 void Sequencer::tick(void)
@@ -71,25 +70,15 @@ void Sequencer::initSequences(int root)
     seq[step]= root+interval;
   } 
 }
-void Sequencer::progChange(Program program)
+void Sequencer::progChange(synthProgram_t program)
 {
-  for (int i=0; i<NUM_UNISON_VOICES; i++) {
-    programChange(program.bank, i, program.voiceProgram[i]);
+  if (program.update == true) 
+  {
+    for (int i=0; i<NUM_UNISON_VOICES; i++) {
+      programChange(program.bank, i, program.voiceProgram[i]);
+    }
   }
-}
-void Sequencer::progChange(void)
-{
-  for (int i=0; i<NUM_UNISON_VOICES; i++) {
-    programChange(currentProgram.bank, i, currentProgram.voiceProgram[i]);
-  }
-}
-
-Program::Program(void)
-{
-  bank = 0;
-  for (int i=0; i<NUM_UNISON_VOICES; i++) {
-    voiceProgram[i] = INITIAL_PROGRAM;
-  }
+  program.update = false;
 }
 
 
