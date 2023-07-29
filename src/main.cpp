@@ -1,7 +1,10 @@
 #include <Arduino.h>
+#include <MsTimer2.h>
+
 #include "defines.h"
 #include "PHLXM.h"
-#include <MsTimer2.h>
+#include "lcdisplay.h"
+
 
 PHLXM* phlxm = NULL;
 
@@ -13,8 +16,7 @@ void tick()
 void setup() 
 {
   phlxm = new PHLXM();
-  MsTimer2::set(phlxm->sq.millisPerTick, tick); // 500ms period
-  //MsTimer2::set(500, tick); // 500ms period
+  MsTimer2::set(phlxm->sq.millisPerTick, tick);
   MsTimer2::start();
 }
 

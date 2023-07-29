@@ -26,12 +26,19 @@
 #define TICKS_PER_BEAT      4
 #define BASE_TEMPO          60
 #define DEFAULT_ROOT        52  // E
-#define NUM_UNISON_VOICES   8
+#define NUM_UNISON_VOICES   4
 #define UNISON_PITCH_SPREAD 320
 #define UNISON_PAN_SPREAD   20
+#define INITIAL_PROGRAM     50
 
 // music defines
 #define SCALE_SIZE          7
+
+
+// enumerated types
+enum mode_e { PC, SEQ, MODE, FX };
+enum transport_e { STOP, PLAY, PAUSE };
+
 
 
 #endif // DEFINES_H

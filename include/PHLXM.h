@@ -1,20 +1,17 @@
 // echacont
 // PHLXM header file
 
-#ifndef FLXMSYNTH_SEQ_H
-#define FLXMSYNTH_SEQ_H
+#ifndef PHLXM_H
+#define PHLXM_H
 
-#include "defines.h"
-
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <Fluxamasynth.h>
+#include "defines.h"
+#include "lcdisplay.h"
 
-// enumerated types
-enum mode_e { PC, MODE, FX };
-enum transport_e { STOP, PLAY, PAUSE };
+
 
 // data structures
+/*
 struct Note {
   int pitch;      // MIDI pitch    [0, 127]
   int velocity;   // MIDI velocity [0, 127]
@@ -24,7 +21,17 @@ struct Note {
   setPitch(int p);
   setNote(int p, int v, int g, int s);
 
+}; 
+class Step 
+{
+  int nextStep;
+  bool enable;
+  Note notes[MAX_NOTES];
+  public:
+  Step();
+  setStep(int step, int pitch);
 };
+*/
 
 struct potStatus {
   bool status[NUM_POTS];
@@ -36,7 +43,7 @@ struct buttonStatus {
   bool value[NUM_BUTTONS];
 };
 
-typedef struct note note_t;
+//typedef struct note note_t;
 typedef struct potStatus potStatus_t;
 typedef struct buttonStatus buttonStatus_t;
 
@@ -48,16 +55,6 @@ struct leds {
 };
 
 typedef struct leds leds_t;
-
-class Step 
-{
-  int nextStep;
-  bool enable;
-  Note notes[MAX_NOTES];
-  public:
-  Step();
-  setStep(int step, int pitch);
-};
 
 // controller
 class Controller
@@ -108,42 +105,31 @@ class Sequencer : private Fluxamasynth
 
 };
 
-// Lcdisplay is derived from LiquidCrystal_I2C 
-class Lcdisp : private LiquidCrystal_I2C
-{
-  private:
-  public:
-  Lcdisp(void);
-  void update(void);
-  void update(int value);
-  void update(int value1, int value2);
-  void update(int value1, int value2, int value3);
-};
 
-class Leds
+class Program
 {
-  private:
-  int  pin[NUM_LEDS];
   public:
-  bool status[NUM_LEDS];
-  // constructor
-  Leds(void);
-  void update(void);
-  void Leds::update(bool leds[]);
-  void Leds::update(int led, bool status);
+  int voiceProgram[NUM_UNISON_VOICES];
+  int voicePan[NUM_UNISON_VOICES];
+  int voiceVol[NUM_UNISON_VOICES];
+  int masterVol;
+  int chorus;
+  int reverb;
+  Program(void);
 };
 
 // PHLXM - top system class
 class PHLXM
 {
   private:
-  //mode_e mode;
+  mode_e mode;
   // controller
   //Controller contrl;
   // LCD
   Lcdisp disp;
 
   public:
+  Program currentProgram;
   Leds leds;
   // sequencer
   Sequencer sq;
@@ -154,4 +140,4 @@ class PHLXM
 
 };
 
-#endif //FLXMSYNTH_SEQ_H
+#endif //PHLXM_H

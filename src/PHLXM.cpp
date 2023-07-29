@@ -2,15 +2,17 @@
 // PHLXM source file
 #include "PHLXM.h"
 
+
 PHLXM::PHLXM(void)
 {
   // initialize variables
-  //mode = PC;
+  mode = PC;
 }
 void PHLXM::run(void)
 {
   leds.update(sq.sqLeds);
-  disp.update(sq.currentStep, sq.currentTick, sq.seq[sq.currentStep]);
+  //disp.update(sq.currentStep, sq.currentTick, sq.seq[sq.currentStep]);
+  disp.update(mode);
 }
 
 Controller::Controller(void)
@@ -21,19 +23,7 @@ Controller::Controller(void)
   }
 }
 
-Step::Step()
-{
-  nextStep = 0;
-  enable = false;
-}
 
-Step::setStep(int step, int pitch)
-{
-  if (step < NUM_STEPS0) nextStep = step+1;
-  else nextStep = 0;
-  enable = true;
-  notes[0].setPitch(pitch);
-}
 
 // sequencer constructor also calls base class constructor
 Sequencer::Sequencer(void) : Fluxamasynth()
@@ -100,83 +90,15 @@ void Sequencer::initSequences(int root)
   } 
 }
 
-Lcdisp::Lcdisp(void)
+Program::Program(void)
 {
-  delay(100);
-  LiquidCrystal_I2C(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
-  begin(COLUMS, ROWS, LCD_5x8DOTS);
-  clear();
-  backlight();
-  home();
-  print("PHLXM was born");
-  write(LCD_NOTE1_SYMBOL);
-  delay(1081);
-  clear();
-}
-
-void Lcdisp::update(int value)
-{
-  home();
-  setCursor(0,1);
-  print(value);
-  write(LCD_SPACE_SYMBOL);
-}
-void Lcdisp::update(int value1, int value2)
-{
-  home();
-  setCursor(0,1);
-  print(value1);
-  write(LCD_SPACE_SYMBOL);
-  setCursor(3,1);
-  print(value2);
-  write(LCD_SPACE_SYMBOL);
-}
-
-void Lcdisp::update(int value1, int value2, int value3)
-{
-  home();
-  setCursor(0,1);
-  print(value1);
-  write(LCD_SPACE_SYMBOL);
-  setCursor(3,1);
-  print(value2);
-  write(LCD_SPACE_SYMBOL);
-  setCursor(6,1);
-  print(value3);
-  write(LCD_SPACE_SYMBOL);
-}
-
-Leds::Leds(void)
-{
-  pin[0] = PIN_LED_GRN;
-  pin[1] = PIN_LED_RED;
-  for (int i = 0; i<NUM_LEDS; i++) {
-    status[i] = false;
-    pinMode(pin[i], OUTPUT);
-    digitalWrite(pin[i], HIGH);
+  for (int i=0; i<NUM_UNISON_VOICES; i++) {
+    voiceProgram[i] = INITIAL_PROGRAM;
+    
   }
 }
 
-void Leds::update(void)
-{
-  for (int i = 0; i<NUM_LEDS; i++) {
-    if(status[i]) digitalWrite(pin[i], LOW);
-    else digitalWrite(pin[i], HIGH);
-  }
-}
-void Leds::update(bool leds[NUM_LEDS])
-{
-  for (int i = 0; i<NUM_LEDS; i++) {
-    status[i] = leds[i];
-    if(status[i]) digitalWrite(pin[i], LOW);
-    else digitalWrite(pin[i], HIGH);
-  }
-}
-void Leds::update(int led, bool status)
-{
-  if(status) digitalWrite(pin[led], LOW);
-  else digitalWrite(pin[led], HIGH);
-}
+/*
 Note::Note(void)
 {
   pitch = DEFAULT_ROOT;
@@ -198,3 +120,17 @@ Note::setNote(int p, int v, int g, int s)
   gate = g;
   start = s;
 }
+Step::Step()
+{
+  nextStep = 0;
+  enable = false;
+}
+
+Step::setStep(int step, int pitch)
+{
+  if (step < NUM_STEPS0) nextStep = step+1;
+  else nextStep = 0;
+  enable = true;
+  notes[0].setPitch(pitch);
+}
+*/
