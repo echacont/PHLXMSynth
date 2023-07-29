@@ -140,19 +140,6 @@ void update(potStatus_t potStatus)
   }
 }
 
-void initSequences(void)
-{
-  int interval = 0;
-  int degree = 0;
-  int scaleSize = sizeof(scale1)/sizeof(int);
-  for(int step = 0; step < NUM_STEPS0; step++) {
-    if (step != 0) interval = interval + scale1[degree];
-    seq0[step].pitch = root+interval;
-    seq0[step].velocity = 100;
-    if (degree > scaleSize) degree = 0;
-  }
-}
-
 void display(potStatus_t potStatus) 
 {
   lcd.home();

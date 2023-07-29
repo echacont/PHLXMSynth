@@ -23,6 +23,20 @@ Controller::Controller(void)
   }
 }
 
+Step::Step()
+{
+  nextStep = 0;
+  enable = false;
+}
+
+Step::setStep(int step, int pitch)
+{
+  if (step < NUM_STEPS0) nextStep = step+1;
+  else nextStep = 0;
+  enable = true;
+  notes[0].setPitch(pitch);
+}
+
 // sequencer constructor also calls base class constructor
 Sequencer::Sequencer(void) : Fluxamasynth()
 {
@@ -43,7 +57,21 @@ Sequencer::Sequencer(void) : Fluxamasynth()
 void Sequencer::tick(void)
 {
   sqLeds[1] = !sqLeds[1];
+}
 
+void Sequencer::initSequences(void)
+{
+  int interval = 0;
+  int degree = 0;
+  int scaleSize = sizeof(minor_scale1)/sizeof(int);
+  for(int step = 0; step < NUM_STEPS0; step++) {
+    if (step != 0) interval = interval + minor_scale1[degree];
+    int pitch = root+interval;
+    seq[step].setStep(step,pitch);
+    //seq[step].velocity = 100;
+
+    if (degree > scaleSize) degree = 0;
+  }
 }
 
 Lcdisp::Lcdisp(void)
@@ -99,4 +127,25 @@ void Leds::update(int led, bool status)
 {
   if(status) digitalWrite(pin[led], LOW);
   else digitalWrite(pin[led], HIGH);
+}
+Note::Note(void)
+{
+  pitch = DEFAULT_ROOT;
+  velocity = 100;
+  gate = 1;
+  start = 0;
+}
+Note::setPitch(int p)
+{
+  pitch = p;
+  velocity = 100;
+  gate = 1;
+  start = 0;
+}
+Note::setNote(int p, int v, int g, int s)
+{
+  pitch = p;
+  velocity = v;
+  gate = g;
+  start = s;
 }

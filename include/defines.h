@@ -20,48 +20,16 @@
 #define LCD_SPACE_SYMBOL    0x20 //space symbol from LCD ROM, see p.9 of GDM2004D datasheet
 #define LCD_NOTE1_SYMBOL    0x91
 // SEQUENCER
-#define NUM_STEPS0          16      
+#define NUM_STEPS0          16
+#define MAX_NOTES           64
 #define TICKS_PER_STEP      4
 #define BASE_TEMPO          60
+#define DEFAULT_ROOT        52  // E
 
-// enumerated types
-enum mode_e { PC, MODE, FX };
-enum transport_e { STOP, PLAY, PAUSE };
 
-// data structures
-struct note {
-  int pitch;
-  int velocity;
-};
 
-struct potStatus {
-  bool status[NUM_POTS];
-  int  value[NUM_POTS];
-};
+// music defines
 
-struct buttonStatus {
-  bool status[NUM_BUTTONS];
-  bool value[NUM_BUTTONS];
-};
 
-typedef struct note note_t;
-typedef struct potStatus potStatus_t;
-typedef struct buttonStatus buttonStatus_t;
-
-struct step {
-  int nextStep;
-  bool enable;
-  int gate;
-  note_t notes[];
-};
-
-typedef struct step step_t;
-
-struct leds {
-  bool status[NUM_LEDS];
-  int  pin[NUM_LEDS];
-};
-
-typedef struct leds leds_t;
 
 #endif // DEFINES_H
