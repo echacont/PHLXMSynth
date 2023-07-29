@@ -2,6 +2,7 @@
 // PHLXM liquid crystal display source file
 
 #include "lcdisplay.h"
+#include "PHLXM.h"
 
 Lcdisp::Lcdisp(void)
 {
@@ -49,14 +50,20 @@ void Lcdisp::update(int value1, int value2, int value3)
   write(LCD_SPACE_SYMBOL);
 }
 
-void Lcdisp::update(mode_e mode)
+void Lcdisp::update(Program program, controllerMode_t controlMode)
 {
-  home();
-  switch(mode)
+  home();  
+  switch(controlMode.mode)
   {         /*  LCD columns  */
     case PC:/*123456789012345*/
-      print("PC   1  2  3  4");
-      //print("");
+      print("Prog 1  2  3  4");
+      setCursor(0,1);
+      print(controlMode.pointer+1);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        setCursor(5+i*3,1);
+        print(program.voiceProgram[i], HEX);
+        write(LCD_SPACE_SYMBOL);
+      }
       break;
     case SEQ:
       break;

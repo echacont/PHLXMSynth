@@ -9,39 +9,27 @@
 #include "sequencer.h"
 #include "lcdisplay.h"
 
-struct potStatus {
-  bool status[NUM_POTS];
-  int  value[NUM_POTS];
-};
-
-struct buttonStatus {
-  bool status[NUM_BUTTONS];
-  bool value[NUM_BUTTONS];
-};
-
-typedef struct potStatus potStatus_t;
-typedef struct buttonStatus buttonStatus_t;
-
 // controller
 class Controller
 {
   private:
-  potStatus_t potStatus, potStatus_prev;
-  buttonStatus_t buttonStatus, buttonStatus_prev;
   public:
+  controllerStatus_t status, status_prev;
+  controllerMode_t controlMode;
   // constructor
   Controller(void);
-  // update values and return true if there was a change
-  bool update(void);
+  void updateController(void);    // see what input is being applied
+  void updateMode(Program program);          // with the input, what is being controlled?
+  controllerStatus_t updateController(controllerStatus_t status_prev);
 };
 
 // PHLXM - top system class
 class PHLXM
 {
   private:
-  mode_e mode;
+
   // controller
-  //Controller contrl;
+  Controller contrl;
   // LCD
   Lcdisp disp;
 

@@ -34,11 +34,35 @@
 // music defines
 #define SCALE_SIZE          7
 
-
 // enumerated types
 enum mode_e { PC, SEQ, MODE, FX };
 enum transport_e { STOP, PLAY, PAUSE };
 
+struct controllerStatus {
+  bool potChanged[NUM_POTS];        // indicates if there was change
+  bool buttonChanged[NUM_BUTTONS];  // indicates if there was change
+  int  potValue[NUM_POTS];
+  bool buttonValue[NUM_BUTTONS];
+};
+typedef struct controllerStatus controllerStatus_t;
 
+struct controllerMode {
+  mode_e mode;
+  transport_e trans;
+  int pointer;
+}; 
+typedef struct controllerMode controllerMode_t;
+
+struct Program
+{
+  int bank;
+  int voiceProgram[NUM_UNISON_VOICES];
+  int voicePan[NUM_UNISON_VOICES];
+  int voiceVol[NUM_UNISON_VOICES];
+  int masterVol;
+  int chorus;
+  int reverb;
+  Program(void);
+};
 
 #endif // DEFINES_H

@@ -7,6 +7,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include "defines.h"
+#include "sequencer.h"
 
 struct leds {
   bool status[NUM_LEDS];
@@ -20,12 +21,13 @@ class Lcdisp : private LiquidCrystal_I2C
 {
   private:
   public:
+  mode_e mode;
   Lcdisp(void);
   void update(void);
   void update(int value);
   void update(int value1, int value2);
   void update(int value1, int value2, int value3);
-  void update(mode_e mode);
+  void update(Program program, controllerMode_t controlMode);
 };
 
 class Leds

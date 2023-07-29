@@ -32,17 +32,6 @@ class Step
 
 */
 
-class Program
-{
-  public:
-  int voiceProgram[NUM_UNISON_VOICES];
-  int voicePan[NUM_UNISON_VOICES];
-  int voiceVol[NUM_UNISON_VOICES];
-  int masterVol;
-  int chorus;
-  int reverb;
-  Program(void);
-};
 
 // sequencer control the synth so it 
 // derives from Fluxamasynth
@@ -77,6 +66,8 @@ class Sequencer : private Fluxamasynth
   Sequencer(void);
   void tick(void);
   void initSequences(int root);
+  void progChange(void);
+  void progChange(Program program);
   void playStep(int step);
 
 };
