@@ -14,6 +14,7 @@ void setup()
 {
   phlxm = new PHLXM();
   MsTimer2::set(phlxm->sq.millisPerTick, tick); // 500ms period
+  //MsTimer2::set(500, tick); // 500ms period
   MsTimer2::start();
 }
 
@@ -29,67 +30,6 @@ void changeProgram(int program)
   if (program < 0) program = 0;
   for (int i=0; i<voices; i++) 
     synth.programChange(127, i, program);
-}
-
-void tick()
-{
-  static boolean output = HIGH;
-  digitalWrite(PIN_LED_RED, output);
-  output = !output;
-
-  bool play = true;
-  if(play)
-  {
-    if(steps0_p == 0 ) {
-      for(int i = 0; i < voices; i++) {
-        synth.allNotesOff(i);
-      }
-    }
-    if(steps0[steps0_p])
-    {
-      digitalWrite(PIN_LED_GRN, LOW);
-      if (currentTicks == 0)
-      {
-        for(int i = 0; i < voices; i++) {
-          synth.noteOn(i, seq0[steps0_p].pitch, seq0[steps0_p].velocity);
-          synth.pitchBend(i, 512 + (i-voices/2)*(spread/voices));
-        }
-      }
-    } 
-    else  // no sound on this step
-    {
-      digitalWrite(PIN_LED_GRN, HIGH);
-      //for(int i = 0; i < voices; i++) {
-        //ynth.noteOff(i,pitch);
-        //synth.allNotesOff(i);
-      //}
-    } 
-    
-    // tempo indicator (RED LED)
-    if(currentTicks == 0)
-    {
-      digitalWrite(PIN_LED_RED, LOW);
-
-    } else {
-      digitalWrite(PIN_LED_RED, HIGH);
-    }
-
-    // overflow control
-    currentTicks++;
-    if (currentTicks == TICKS_PER_STEP) 
-    {
-      currentTicks = 0;
-      steps0_p++;
-      if (steps0_p == NUM_STEPS0) steps0_p = 0;
-    }
-  } // if (play)
-  else { // stop
-    digitalWrite(PIN_LED_GRN, HIGH);
-    digitalWrite(PIN_LED_RED, HIGH);
-    for (int i=0; i<voices; i++) {
-      synth.allNotesOff(i);
-    }
-  }
 }
 
 void changeTempo(int pot)
@@ -140,53 +80,4 @@ void update(potStatus_t potStatus)
   }
 }
 
-void display(potStatus_t potStatus) 
-{
-  lcd.home();
-  // print header. TODO: only do if theres a change
-  switch(mode) 
-  {
-    case 0:   // Program Change
-      lcd.print("Prog  BPM seq");
-      break;
-    default:
-      break;
-  }
-  lcd.setCursor(0,1);
-  for(int p=0; p<NUM_POTS; p++)
-  {
-    if (potStatus.status[p])
-    {
-      // print pot values to screen
-      lcd.setCursor(3*p,1);
-      lcd.print(potStatus.value[p], HEX);
-      lcd.write(LCD_SPACE_SYMBOL);
-      // print tempo if change in pot 1
-      if (p == 1) {
-        lcd.setCursor(6,1);
-        lcd.print(tempo);
-        lcd.write(LCD_SPACE_SYMBOL);
-      }
-    }
-  }
-}
-
-void setup() 
-{
-  initSequences();
-
-  //changeProgram(69);
-
-
-
-}
-
-void loop() {
-  potStatus_prev = potStatus_new;
-  potStatus_new = potentiometers(potStatus_prev);
-
-  update(potStatus_new);
-  display(potStatus_new);
-
-}
 */

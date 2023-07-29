@@ -23,13 +23,15 @@
 #define NUM_STEPS0          16
 #define MAX_NOTES           64
 #define TICKS_PER_STEP      4
+#define TICKS_PER_BEAT      4
 #define BASE_TEMPO          60
 #define DEFAULT_ROOT        52  // E
-
-
+#define NUM_UNISON_VOICES   8
+#define UNISON_PITCH_SPREAD 320
+#define UNISON_PAN_SPREAD   20
 
 // music defines
-
+#define SCALE_SIZE          7
 
 
 #endif // DEFINES_H

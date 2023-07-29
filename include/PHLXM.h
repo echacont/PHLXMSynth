@@ -76,29 +76,35 @@ class Controller
 // derives from Fluxamasynth
 class Sequencer : private Fluxamasynth
 {
-  private:
-  // scales
-  int root = 52;
-  int pitch = root;
-  int major_scale[7] = {2, 2, 1, 2, 2, 2, 1};     // major scale
-  int minor_scale1[7] = {2, 1, 2, 2, 2, 1, 2};     // minor scale
-  public:
-  int ticksPerBeat = 4;
-  int millisPerTick =  125;
-  int voices = 8;
-  int spread = 420;
-  int panspread = 20;
-  int tempo = BASE_TEMPO;
-  // step sequence
-  Step seq[NUM_STEPS0];
-  // sequencer
-  Fluxamasynth synth;
 
+  private:
+  public:
+  // scales
+  //int major_scale[7]  = {2, 2, 1, 2, 2, 2, 1};     // major scale
+  int minor_scale1[SCALE_SIZE] = {2, 1, 2, 2, 2, 1, 2};     // minor scale
+
+  // step sequence
+  int seq[NUM_STEPS0];
+  //Step seq[NUM_STEPS0];
+
+  // synthesis
+  int voices;
+  int spread;
+  int panspread;
+
+  // transport
+  transport_e trans;
+  int tempo;
+  int millisPerTick;
+  int currentTick;
+  int currentStep;
+  
   bool sqLeds[NUM_LEDS];
-  // constructor
+
   Sequencer(void);
   void tick(void);
-  void initSequences(void);
+  void initSequences(int root);
+  void playStep(int step);
 
 };
 
@@ -106,11 +112,12 @@ class Sequencer : private Fluxamasynth
 class Lcdisp : private LiquidCrystal_I2C
 {
   private:
-  LiquidCrystal_I2C lcd;
   public:
   Lcdisp(void);
   void update(void);
   void update(int value);
+  void update(int value1, int value2);
+  void update(int value1, int value2, int value3);
 };
 
 class Leds
@@ -133,10 +140,9 @@ class Leds
 class PHLXM
 {
   private:
-  mode_e mode;
-  transport_e trans;
+  //mode_e mode;
   // controller
-  Controller contrl;
+  //Controller contrl;
   // LCD
   Lcdisp disp;
 
@@ -150,35 +156,5 @@ class PHLXM
   void tick(void);
 
 };
-
-/*
-// constantes en memoria
-const int ticksPerBeat    = 4;
-const int voices          = 8;
-const int spread          = 420;
-const int panspread       = 20;
-const int baseTempo       = 60;
-
-// state
-int mode = 0;
-int tempo = 120;        // BPM
-potStatus_t potStatus_new, potStatus_prev;
-
-// sequencer
-bool steps0[NUM_STEPS0] = { true, true, true, true,
-                            true, true, true, true,
-                            true, true, true, true,
-                            true, true, true, false  }; 
-
-note_t seq0[NUM_STEPS0];
-
-int  steps0_p = 0;
-int  currentTicks = 0;
-
-
-
-Fluxamasynth synth;
-LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
-*/
 
 #endif //FLXMSYNTH_SEQ_H

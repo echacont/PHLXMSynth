@@ -5,14 +5,12 @@
 PHLXM::PHLXM(void)
 {
   // initialize variables
-  mode = PC;
-  trans = STOP;
-
+  //mode = PC;
 }
 void PHLXM::run(void)
 {
   leds.update(sq.sqLeds);
-  disp.update(sq.millisPerTick);
+  disp.update(sq.currentStep, sq.currentTick, sq.seq[sq.currentStep]);
 }
 
 Controller::Controller(void)
@@ -40,62 +38,113 @@ Step::setStep(int step, int pitch)
 // sequencer constructor also calls base class constructor
 Sequencer::Sequencer(void) : Fluxamasynth()
 {
+  tempo = BASE_TEMPO;
+  trans = STOP;
+  voices = NUM_UNISON_VOICES;
+  spread = UNISON_PITCH_SPREAD;
+  panspread = UNISON_PAN_SPREAD;
+  millisPerTick = 60000/(tempo*TICKS_PER_BEAT); // 250    
+  currentTick = 0;
+  currentStep = 0;
+  for (int i=0; i<NUM_LEDS; i++) sqLeds[i] = false;
+  setMasterVolume(72);
   for (int i=0; i<voices; i++) {
-    synth.allNotesOff(i); 
-    synth.setChannelVolume(i, 32);  
-    synth.pan(i,127-((i-voices/2)*panspread));
-    synth.setChorus(i, 6, 32, 80, 8 );
-    synth.setReverb(i, 7, 72, 72);
+    allNotesOff(i); 
+    setChannelVolume(i, 32);  
+    pan(i,127-((i-voices/2)*panspread));
+    setChorus(i, 6, 32, 80, 8 );
+    setReverb(i, 7, 72, 72);
   }
-  synth.setMasterVolume(72);
 
-  millisPerTick = 60000/(tempo*ticksPerBeat); // 250
-  for(int i=0; i<NUM_LEDS; i++)
-    sqLeds[i] = false;
+  initSequences(DEFAULT_ROOT);
 }
 
 void Sequencer::tick(void)
 {
   sqLeds[1] = !sqLeds[1];
+
+  playStep(currentStep);
+
+  currentTick++;
+  if (currentTick == TICKS_PER_STEP) 
+  {
+    currentTick = 0;
+    currentStep++;
+    if (currentStep == NUM_STEPS0) currentStep = 0;
+  }
 }
 
-void Sequencer::initSequences(void)
+void Sequencer::playStep(int step)
+{
+  if (currentTick == 0) 
+    for(int i = 0; i < voices; i++) {
+      noteOn(i, seq[step], 100);
+      pitchBend(i, 512 + (i-voices/2)*(spread/voices));
+    }
+  if (currentTick == TICKS_PER_STEP-1)
+    for(int i = 0; i < voices; i++) {
+      noteOff(i, seq[step]);
+  }
+}
+
+void Sequencer::initSequences(int root)
 {
   int interval = 0;
   int degree = 0;
-  int scaleSize = sizeof(minor_scale1)/sizeof(int);
+  int scaleSize = SCALE_SIZE;
   for(int step = 0; step < NUM_STEPS0; step++) {
-    if (step != 0) interval = interval + minor_scale1[degree];
-    int pitch = root+interval;
-    seq[step].setStep(step,pitch);
-    //seq[step].velocity = 100;
-
-    if (degree > scaleSize) degree = 0;
-  }
+    degree = step%scaleSize;
+    if (step == 0) interval = 0;
+    else interval = interval+minor_scale1[degree];
+    seq[step]= root+interval;
+  } 
 }
 
 Lcdisp::Lcdisp(void)
 {
   delay(100);
-  lcd = LiquidCrystal_I2C(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
-  lcd.begin(COLUMS, ROWS, LCD_5x8DOTS);
-  lcd.clear();
-  lcd.backlight();
-  lcd.home();
-  lcd.print("PHLXM was born");
-  lcd.write(LCD_NOTE1_SYMBOL);
-  delay(3000);
-  lcd.clear();
+  LiquidCrystal_I2C(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
+  begin(COLUMS, ROWS, LCD_5x8DOTS);
+  clear();
+  backlight();
+  home();
+  print("PHLXM was born");
+  write(LCD_NOTE1_SYMBOL);
+  delay(1081);
+  clear();
 }
 
 void Lcdisp::update(int value)
 {
-  lcd.home();
-  lcd.setCursor(0,1);
-  lcd.print(value);
-  lcd.write(LCD_SPACE_SYMBOL);
+  home();
+  setCursor(0,1);
+  print(value);
+  write(LCD_SPACE_SYMBOL);
+}
+void Lcdisp::update(int value1, int value2)
+{
+  home();
+  setCursor(0,1);
+  print(value1);
+  write(LCD_SPACE_SYMBOL);
+  setCursor(3,1);
+  print(value2);
+  write(LCD_SPACE_SYMBOL);
 }
 
+void Lcdisp::update(int value1, int value2, int value3)
+{
+  home();
+  setCursor(0,1);
+  print(value1);
+  write(LCD_SPACE_SYMBOL);
+  setCursor(3,1);
+  print(value2);
+  write(LCD_SPACE_SYMBOL);
+  setCursor(6,1);
+  print(value3);
+  write(LCD_SPACE_SYMBOL);
+}
 
 Leds::Leds(void)
 {
