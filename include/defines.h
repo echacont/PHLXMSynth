@@ -12,6 +12,8 @@
 #define NUM_POTS            2
 #define NUM_BUTTONS         3
 #define NUM_LEDS            2
+#define GRN_LED             0
+#define RED_LED             1
 // LCD
 #define COLUMS              20   //LCD columns
 #define ROWS                2    //LCD rows
@@ -20,6 +22,7 @@
 // SEQUENCER
 #define NUM_STEPS0          16      
 #define TICKS_PER_STEP      4
+#define BASE_TEMPO          60
 
 // enumerated types
 enum mode_e { PC, MODE, FX };
@@ -54,10 +57,11 @@ struct step {
 
 typedef struct step step_t;
 
-struct ledStatus {
+struct leds {
   bool status[NUM_LEDS];
+  int  pin[NUM_LEDS];
 };
 
-typedef struct ledStatus ledStatus_t;
+typedef struct leds leds_t;
 
 #endif // DEFINES_H

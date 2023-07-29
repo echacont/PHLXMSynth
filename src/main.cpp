@@ -1,12 +1,20 @@
 #include <Arduino.h>
 #include "defines.h"
 #include "PHLXM.h"
+#include <MsTimer2.h>
 
 PHLXM* phlxm = NULL;
+
+void tick()
+{
+  phlxm->sq.tick();
+}
 
 void setup() 
 {
   phlxm = new PHLXM();
+  MsTimer2::set(phlxm->sq.millisPerTick, tick); // 500ms period
+  MsTimer2::start();
 }
 
 void loop() 
@@ -178,35 +186,11 @@ void display(potStatus_t potStatus)
 
 void setup() 
 {
-  // LED outputs
-  pinMode(PIN_LED_GRN, OUTPUT);
-  pinMode(PIN_LED_RED, OUTPUT);
-  digitalWrite(PIN_LED_GRN, HIGH);
-  digitalWrite(PIN_LED_RED, HIGH);
-
-  //randomSeed(analogRead(0));
-  delay(100);
-
   initSequences();
 
-  for (int i=0; i<voices; i++) {
-    synth.allNotesOff(i); 
-    synth.setChannelVolume(i, 32);  
-    synth.pan(i,127-((i-voices/2)*panspread));
-    synth.setChorus(i, 6, 32, 80, 8 );
-    synth.setReverb(i, 7, 72, 72);
-  }
-
-  synth.setMasterVolume(72);
   //changeProgram(69);
 
-  lcd.begin(COLUMS, ROWS, LCD_5x8DOTS);
-  lcd.clear();
-  lcd.backlight();
 
-  int millisPerTick = 60000/(tempo*ticksPerBeat);
-  MsTimer2::set(millisPerTick, tick); // 500ms period
-  MsTimer2::start();
 
 }
 

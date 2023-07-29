@@ -9,6 +9,11 @@ PHLXM::PHLXM(void)
   trans = STOP;
 
 }
+void PHLXM::run(void)
+{
+  leds.update(sq.sqLeds);
+  disp.update(sq.millisPerTick);
+}
 
 Controller::Controller(void)
 {
@@ -21,6 +26,23 @@ Controller::Controller(void)
 // sequencer constructor also calls base class constructor
 Sequencer::Sequencer(void) : Fluxamasynth()
 {
+  for (int i=0; i<voices; i++) {
+    synth.allNotesOff(i); 
+    synth.setChannelVolume(i, 32);  
+    synth.pan(i,127-((i-voices/2)*panspread));
+    synth.setChorus(i, 6, 32, 80, 8 );
+    synth.setReverb(i, 7, 72, 72);
+  }
+  synth.setMasterVolume(72);
+
+  millisPerTick = 60000/(tempo*ticksPerBeat); // 250
+  for(int i=0; i<NUM_LEDS; i++)
+    sqLeds[i] = false;
+}
+
+void Sequencer::tick(void)
+{
+  sqLeds[1] = !sqLeds[1];
 
 }
 
@@ -32,34 +54,49 @@ Lcdisp::Lcdisp(void)
   lcd.clear();
   lcd.backlight();
   lcd.home();
-  lcd.print("PHLXM is born");
+  lcd.print("PHLXM was born");
   lcd.write(LCD_NOTE1_SYMBOL);
+  delay(3000);
+  lcd.clear();
 }
+
+void Lcdisp::update(int value)
+{
+  lcd.home();
+  lcd.setCursor(0,1);
+  lcd.print(value);
+  lcd.write(LCD_SPACE_SYMBOL);
+}
+
 
 Leds::Leds(void)
 {
-  for (int i = 0; i<NUM_LEDS; i++)
-    leds.status[i] = false;
-
-  // LED outputs
-  pinMode(PIN_LED_GRN, OUTPUT);
-  pinMode(PIN_LED_RED, OUTPUT);
-  digitalWrite(PIN_LED_GRN, HIGH);
-  digitalWrite(PIN_LED_RED, HIGH);
+  pin[0] = PIN_LED_GRN;
+  pin[1] = PIN_LED_RED;
+  for (int i = 0; i<NUM_LEDS; i++) {
+    status[i] = false;
+    pinMode(pin[i], OUTPUT);
+    digitalWrite(pin[i], HIGH);
+  }
 }
 
-void Leds::greenLed(bool on)
+void Leds::update(void)
 {
-  if(on)
-    digitalWrite(PIN_LED_GRN, LOW);
-  else 
-    digitalWrite(PIN_LED_GRN, HIGH);
+  for (int i = 0; i<NUM_LEDS; i++) {
+    if(status[i]) digitalWrite(pin[i], LOW);
+    else digitalWrite(pin[i], HIGH);
+  }
 }
-
-void Leds::redLed(bool on)
+void Leds::update(bool leds[NUM_LEDS])
 {
-  if(on)
-    digitalWrite(PIN_LED_RED, LOW);
-  else 
-    digitalWrite(PIN_LED_RED, HIGH);
+  for (int i = 0; i<NUM_LEDS; i++) {
+    status[i] = leds[i];
+    if(status[i]) digitalWrite(pin[i], LOW);
+    else digitalWrite(pin[i], HIGH);
+  }
+}
+void Leds::update(int led, bool status)
+{
+  if(status) digitalWrite(pin[led], LOW);
+  else digitalWrite(pin[led], HIGH);
 }

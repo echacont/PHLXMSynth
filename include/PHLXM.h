@@ -6,7 +6,7 @@
 
 #include "defines.h"
 
-#include <MsTimer2.h>
+
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Fluxamasynth.h>
@@ -29,19 +29,23 @@ class Controller
 class Sequencer : private Fluxamasynth
 {
   private:
+  public:
   int ticksPerBeat    = 4;
-  int baseTempo       = 60;
+  int millisPerTick =  125;
   int voices = 8;
   int spread = 420;
   int panspread = 20;
-  int tempo;
+  int tempo = BASE_TEMPO;
   // step sequence
   step_t seq[NUM_STEPS0];
   // sequencer
   Fluxamasynth synth;
-  public:
+
+  bool sqLeds[NUM_LEDS];
   // constructor
   Sequencer(void);
+  void tick(void);
+
 };
 
 // LCD display
@@ -53,16 +57,22 @@ class Lcdisp : private LiquidCrystal_I2C
   public:
   Lcdisp(void);
   void update(void);
+  void update(int value);
 };
 
 class Leds
 {
   private:
-  ledStatus_t leds;
+  int  pin[NUM_LEDS];
   public:
+  bool status[NUM_LEDS];
+  // constructor
   Leds(void);
-  void greenLed(bool);
-  void redLed(bool);
+  void update(void);
+  void Leds::update(bool leds[]);
+  void Leds::update(int led, bool status);
+  //void greenLed(bool);
+  //void redLed(bool);
 };
 
 // PHLXM - top system class
@@ -74,17 +84,17 @@ class PHLXM
   transport_e trans;
   // controller
   Controller contrl;
-  // sequencer
-  Sequencer sq;
   // LCD
   Lcdisp disp;
 
-
-
   public:
   Leds leds;
+  // sequencer
+  Sequencer sq;
+  // constructor
   PHLXM(void);
-
+  void run(void);
+  void tick(void);
 
 };
 
