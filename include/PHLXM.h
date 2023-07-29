@@ -131,12 +131,9 @@ class Leds
   void update(void);
   void Leds::update(bool leds[]);
   void Leds::update(int led, bool status);
-  //void greenLed(bool);
-  //void redLed(bool);
 };
 
 // PHLXM - top system class
-// derives Fluxamasynth, LiquidCrystal_I2C classes
 class PHLXM
 {
   private:
