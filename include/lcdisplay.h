@@ -8,6 +8,13 @@
 #include <LiquidCrystal_I2C.h>
 #include "defines.h"
 
+struct leds {
+  bool status[NUM_LEDS];
+  int  pin[NUM_LEDS];
+};
+
+typedef struct leds leds_t;
+
 // Lcdisplay is derived from LiquidCrystal_I2C 
 class Lcdisp : private LiquidCrystal_I2C
 {
