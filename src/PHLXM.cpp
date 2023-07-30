@@ -41,11 +41,13 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = PC;
+  mode.menu = HARM_MODE;
+  mode.menuChanged = true;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.option = 0;
   mode.root = DEFAULT_ROOT;
+  mode.chordStep = 2;
   for (int i=0; i<NUM_STEPS0; i++)
     mode.pSeq[i] = 1;
   mode.updateSeq = false;
@@ -95,9 +97,12 @@ void Controller::updateStatus(void)
 
 void Controller::updateMode()
 {
-  program.update = false;
-  if (mode.menu != mode.prev_menu)
+  if (mode.menuChanged) {
     mode.pointer = 0; // reset pointer if just entered menu
+    mode.option = 0;
+    mode.menuChanged = false;
+  }
+  program.update = false;
   // state machine kinda
   // transport machine uses buttons 1 (STOP) and 2 (PLAY/PAUSE)
   // TODO: transport machine
@@ -133,15 +138,42 @@ void Controller::updateMode()
     }
     break;
 
+  case HARM_MODE:
+    if (status.potChanged[POT_0] == true) {
+      // get 1 MSB because only two options (Root, Step)
+      mode.pointer = status.potValue[POT_0]>>6; 
+    }
+    if (status.potChanged[POT_1] == true) {
+      if (mode.pointer == 0) // Root
+        // cannot be zero (could be interpreted as silence by sequencer)
+        // this can be source of bugs in the future
+        mode.option = status.potValue[POT_1]+1;
+      if (mode.pointer == 1)   // Chord steps
+        // 3 bits are needed to decode the scale up to an octave
+        mode.option = status.potValue[POT_1]>>4;
+    }
+    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
+      if (mode.pointer == 0) {// ROot
+        mode.root = mode.option;
+        mode.updateSeq = true;
+      }
+      if (mode.pointer == 1) {
+        mode.chordStep = mode.option;
+        mode.updateSeq = true;
+      }
+    }
+    break; 
+
   default:
     break;
   }
 
   // scroll the menu
-  if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0])
+  if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0]) {
     mode.menu = mode.menu+1;
+    mode.menuChanged = true;
+  }
   if (mode.menu == last) mode.menu = 0;
-  mode.prev_menu = mode.menu;
 
   // clear potChanged and buttonChanged flags
   for (int i=0; i<NUM_POTS; i++)

@@ -13,6 +13,7 @@ Lcdisp::Lcdisp(void)
   backlight();
   home();
   print("PHLXM synth");
+  setCursor(0,1); write(0xBE); write(0x6B);
   delay(381);
   clear();
 }
@@ -23,6 +24,8 @@ void Lcdisp::update(synthProgram_t program,
                    // controllerStatus_t status) // get rid of this
 {
   home();
+  if (mode.menuChanged) clear();
+
   switch(mode.menu)
   {         /*  LCD columns  */
     case PC:/*123456789012345*/
@@ -46,7 +49,14 @@ void Lcdisp::update(synthProgram_t program,
       print("Sprd   bend pan ");
       break;
     case HARM_MODE:
-      print("Harm            ");  
+      setCursor(3,0); print("Root Step");
+      setCursor(0,1); 
+      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
+      print(mode.option, HEX); 
+      setCursor(2,1); write(LCD_RIGHT_SYMBOL);
+      setCursor(3,1); print(state.root, HEX);
+      //if (state.root )
+      setCursor(8,1); print(state.chordStep);
       break;
 
     case SEQ:
@@ -61,7 +71,8 @@ void Lcdisp::update(synthProgram_t program,
       for (int i=0; i<NUM_STEPS0; i++) 
         if (i == mode.pointer) write(LCD_STAR_SYMBOL);
         else write(LCD_SPACE_SYMBOL);
-      setCursor(15,1); write(LCD_0_SYMBOL+(mode.option));
+      setCursor(14,1); 
+      write(LCD_LEFT_SYMBOL); write(LCD_0_SYMBOL+(mode.option));
       break;
 
     case FX:

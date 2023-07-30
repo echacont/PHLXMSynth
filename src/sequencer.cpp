@@ -19,6 +19,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   state.currentTick = 0;
   state.currentStep = 0;
   state.root = DEFAULT_ROOT;
+  state.chordStep = 2;
 
   for (int i=0; i<NUM_LEDS; i++) sqLeds[i] = false;
   

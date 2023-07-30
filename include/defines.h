@@ -61,13 +61,15 @@ struct controllerStatus {
 typedef struct controllerStatus controllerStatus_t;
 
 struct controllerMode {
-  mode_e menu, prev_menu;
+  mode_e menu;
   transport_e trans;
   // user interface
+  bool menuChanged;
   int pointer;
   int option;
   // "MIDI input"
   int root;     // input note
+  int chordStep;
   // user sequence
   bool updateSeq;
   int pSeq[NUM_STEPS0];
@@ -91,6 +93,7 @@ struct sequencerState {
   transport_e trans;
   int tempo;
   int root;
+  int chordStep;
   int voices;
   int spread;
   int panspread;
