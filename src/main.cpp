@@ -16,7 +16,7 @@ void tick ()
 void setup () 
 {
   phlxm = new PHLXM();
-  MsTimer2::set(phlxm->sq.millisPerTick, tick);
+  MsTimer2::set(phlxm->sq.state.millisPerTick, tick);
   MsTimer2::start();
 }
 

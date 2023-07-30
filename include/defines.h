@@ -59,9 +59,13 @@ typedef struct controllerStatus controllerStatus_t;
 struct controllerMode {
   mode_e menu, prev_menu;
   transport_e trans;
+  // user interface
   int pointer;
-  int count;
+  int option;
+  // "MIDI input"
   int root;     // input note
+  // user sequence
+  bool updateSeq;
   int pSeq[NUM_STEPS0];
 }; 
 typedef struct controllerMode controllerMode_t;
@@ -78,5 +82,18 @@ struct Program_s
   bool update;
 };
 typedef struct Program_s synthProgram_t;
+
+struct sequencerState {
+  transport_e trans;
+  int tempo;
+  int root;
+  int voices;
+  int spread;
+  int panspread;
+  int millisPerTick;
+  int currentTick;
+  int currentStep;
+};
+typedef struct sequencerState sequencerState_t;
 
 #endif // DEFINES_H

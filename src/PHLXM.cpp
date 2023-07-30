@@ -11,10 +11,11 @@ void PHLXM::run(void)
   contrl.updateStatus();          // reads controller into status
   contrl.updateMode();      // what needs to be done.
   sq.progChange(contrl.program);  // apply program change
-  //sq.initSequence(contrl.mode);
+  sq.updateSequencer(contrl.mode); // apply user sequence
   disp.update(contrl.program,
               contrl.mode,
-              contrl.status);
+              sq.state);
+              //contrl.status);   // get rid of this
 }
 
 /*--------------------------------------------------*/
@@ -43,10 +44,11 @@ Controller::Controller(void)
   mode.menu = SEQ;
   mode.trans = STOP;
   mode.pointer = 0;
-  mode.count = 0;
+  mode.option = 0;
   mode.root = DEFAULT_ROOT;
   for (int i=0; i<NUM_STEPS0; i++)
     mode.pSeq[i] = 1;
+  mode.updateSeq = false;
   // initialize a program
   program.bank = 0;
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
@@ -120,7 +122,11 @@ void Controller::updateMode()
     }
     if (status.potChanged[POT_1] == true) {
       // 3 bits are needed to decode the scale up to an octave
-      //mode.pSeq[mode.pointer] = status.potValue[POT_1]>>4;
+      mode.option = status.potValue[POT_1]>>4;
+    }
+    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
+      mode.pSeq[mode.pointer] = mode.option;
+      mode.updateSeq = true;
     }
     break;
 
@@ -139,6 +145,5 @@ void Controller::updateMode()
     status.potChanged[i] = false;
   for (int i=0; i<NUM_BUTTONS; i++)
     status.buttonChanged[i] = false;
-  // clear debounce buffer
 
 }

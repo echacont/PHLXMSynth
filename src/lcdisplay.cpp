@@ -12,14 +12,15 @@ Lcdisp::Lcdisp(void)
   clear();
   backlight();
   home();
-  print("PHLXM was born");
+  print("PHLXM synth");
   delay(381);
   clear();
 }
 
 void Lcdisp::update(synthProgram_t program, 
                     controllerMode_t mode, 
-                    controllerStatus_t status)
+                    sequencerState_t state)
+                   // controllerStatus_t status) // get rid of this
 {
   home();
   switch(mode.menu)
@@ -43,19 +44,16 @@ void Lcdisp::update(synthProgram_t program,
     case SEQ:
       print("Step"); write(LCD_SPACE_SYMBOL);
       setCursor(6,0);
-      for (int i=0; i<NUM_STEPS0; i++) {
-        int code = LCD_0_SYMBOL+mode.pSeq[i];
-        write(code);
-      }
-      setCursor(15,0);
-      write(LCD_0_SYMBOL);
-      setCursor(0,1);
-      print(mode.pointer); write(LCD_SPACE_SYMBOL);
+      for (int i=0; i<NUM_STEPS0; i++)
+        write(LCD_0_SYMBOL+mode.pSeq[i]);
+      setCursor(15,0);write(LCD_0_SYMBOL+state.currentStep+1);
+      // TODO print the root note (A,A#,B,C,C#,D,D#,E,F,F#,G,G#)
+      setCursor(0,1); print("r "); print(mode.root); write(LCD_SPACE_SYMBOL);
       setCursor(6,1);
       for (int i=0; i<NUM_STEPS0; i++) 
         if (i == mode.pointer) write(LCD_STAR_SYMBOL);
         else write(LCD_SPACE_SYMBOL);
-      setCursor(15,1); write(LCD_0_SYMBOL+(status.potValue[POT_1]>>4));
+      setCursor(15,1); write(LCD_0_SYMBOL+(mode.option));
       break;
 
     case FX:
