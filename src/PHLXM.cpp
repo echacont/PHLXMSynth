@@ -38,8 +38,8 @@ Controller::Controller(void)
     for (int j=0; j<NUM_DEBOUNCES; j++)
       buttondeBounce[j][i] = false;
 
-  // initialize the controller mode (state)
-  controlMode.mode = PC;
+  // initialize the controller mode
+  controlMode.menu = PC;
   controlMode.trans = STOP;
   controlMode.pointer = 0;
   controlMode.count = 0;
@@ -93,7 +93,7 @@ void Controller::updateControl()
   // state machine kinda
   // transport machine uses buttons 1 (STOP) and 2 (PLAY/PAUSE)
   // TODO: transport machine
-  switch (controlMode.mode)
+  switch (controlMode.menu)
   {
   case PC:  // program change
     if (status.potChanged[POT_0] == true) {
@@ -102,15 +102,17 @@ void Controller::updateControl()
     if (status.potChanged[POT_1] == true) {
       program.voiceProgram[controlMode.pointer] = status.potValue[1]; // 7 bits
       program.update = true;
-    }
-    if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0])
-      //controlMode.count++;
-    
+    }  
     break;
   
   default:
     break;
   }
+
+  if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0])
+    controlMode.menu = controlMode.menu+1;
+  if (controlMode.menu == last) controlMode.menu = PC;
+
   // clear potChanged and buttonChanged flags
   for (int i=0; i<NUM_POTS; i++)
     status.potChanged[i] = false;

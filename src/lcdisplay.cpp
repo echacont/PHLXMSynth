@@ -52,32 +52,34 @@ void Lcdisp::update(int value1, int value2, int value3)
 
 void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode, controllerStatus_t status)
 {
-  home();  
-  switch(controlMode.mode)
+  home();
+  switch(controlMode.menu)
   {         /*  LCD columns  */
     case PC:/*123456789012345*/
       print("Prog 1  2  3  4");
       setCursor(0,1);
       print(controlMode.pointer+1);
       write(LCD_SPACE_SYMBOL);
-      if (status.buttonChanged[0])
-        if (status.buttonValue[0])
-          print("A");
-        else write(LCD_SPACE_SYMBOL);
-      print(controlMode.count);
       for (int i=0; i<NUM_UNISON_VOICES; i++) {
         setCursor(5+i*3,1);
         print(program.voiceProgram[i], HEX);
         write(LCD_SPACE_SYMBOL);
       }
       break;
-    case SEQ:
+    case SPREAD:
+      print("Sprd   bend pan ");
       break;
-    case MODE:
+    case HARM_MODE:
+      print("Harm            ");  
+      break;
+    case SEQ:
+      print("Sequ            ");
       break;
     case FX:
+      print("FX              ");
       break;
     default:
+      print("Go away!        ");
       break;
   }
 }

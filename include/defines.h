@@ -44,7 +44,7 @@
 #define SCALE_SIZE          7
 
 // enumerated types
-enum mode_e { PC, SEQ, MODE, FX };
+enum mode_e { PC=0, SPREAD, HARM_MODE, SEQ, FX, last };
 enum transport_e { STOP, PLAY, PAUSE };
 
 struct controllerStatus {
@@ -56,7 +56,7 @@ struct controllerStatus {
 typedef struct controllerStatus controllerStatus_t;
 
 struct controllerMode {
-  mode_e mode;
+  mode_e menu;
   transport_e trans;
   int pointer;
   int count;

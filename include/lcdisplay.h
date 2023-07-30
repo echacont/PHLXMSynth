@@ -21,7 +21,6 @@ class Lcdisp : private LiquidCrystal_I2C
 {
   private:
   public:
-  mode_e mode;
   Lcdisp(void);
   void update(void);
   void update(int value);
