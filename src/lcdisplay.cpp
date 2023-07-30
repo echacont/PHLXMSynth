@@ -50,7 +50,7 @@ void Lcdisp::update(int value1, int value2, int value3)
   write(LCD_SPACE_SYMBOL);
 }
 
-void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode)
+void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode, controllerStatus_t status)
 {
   home();  
   switch(controlMode.mode)
@@ -59,6 +59,12 @@ void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode)
       print("Prog 1  2  3  4");
       setCursor(0,1);
       print(controlMode.pointer+1);
+      write(LCD_SPACE_SYMBOL);
+      if (status.buttonChanged[0])
+        if (status.buttonValue[0])
+          print("A");
+        else write(LCD_SPACE_SYMBOL);
+      print(controlMode.count);
       for (int i=0; i<NUM_UNISON_VOICES; i++) {
         setCursor(5+i*3,1);
         print(program.voiceProgram[i], HEX);

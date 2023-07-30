@@ -13,6 +13,9 @@
 class Controller
 {
   private:
+  int buttonPins[NUM_BUTTONS];
+  bool buttondeBounce[NUM_DEBOUNCES][NUM_BUTTONS];
+  int count;
   public:
   controllerStatus_t status, status_prev;
   controllerMode_t controlMode;
@@ -27,7 +30,6 @@ class Controller
 class PHLXM
 {
   private:
-
   // controller
   Controller contrl;
   // LCD
@@ -41,7 +43,6 @@ class PHLXM
   PHLXM(void);
   void run(void);
   void tick(void);
-
 };
 
 #endif //PHLXM_H

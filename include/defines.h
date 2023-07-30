@@ -14,6 +14,15 @@
 #define NUM_LEDS            2
 #define GRN_LED             0
 #define RED_LED             1
+#define PIN_BUTTON_2        2
+#define PIN_BUTTON_1        3
+#define PIN_BUTTON_0        4
+#define NUM_DEBOUNCES       3
+#define BUTTON_0            0
+#define BUTTON_1            1
+#define BUTTON_2            2
+#define POT_0               0
+#define POT_1               1
 // LCD
 #define COLUMS              20   //LCD columns
 #define ROWS                2    //LCD rows
@@ -50,6 +59,7 @@ struct controllerMode {
   mode_e mode;
   transport_e trans;
   int pointer;
+  int count;
 }; 
 typedef struct controllerMode controllerMode_t;
 
