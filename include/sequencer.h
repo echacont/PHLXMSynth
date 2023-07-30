@@ -15,7 +15,8 @@ class Sequencer : private Fluxamasynth
   public:
   // scales
   //int major_scale[7]  = {2, 2, 1, 2, 2, 2, 1};     // major scale
-  int minor_scale1[SCALE_SIZE] = {2, 1, 2, 2, 2, 1, 2};     // minor scale
+  int minor_scale[SCALE_SIZE] =  {2, 1, 2, 2, 2, 1, 2};     // minor scale
+  int minor_scaleI[SCALE_SIZE] = {0, 2, 3, 5, 7, 9, 10};     // minor scale
 
   // step sequence
   int seq[NUM_STEPS0];
@@ -31,6 +32,7 @@ class Sequencer : private Fluxamasynth
   void updateSequencer(controllerMode_t mode);
   void progChange(synthProgram_t program);
   void playStep(int step);
+  void playChord(int pitch, int numNotes, bool gate);
 };
 
 

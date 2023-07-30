@@ -54,15 +54,34 @@ void Sequencer::playStep(int step)
   if (seq[step] != 0)
   {
     if (state.currentTick == 0) 
-      for(int i = 0; i < state.voices; i++) {
-        noteOn(i, seq[step], 100);
-        pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
-      }
+      //for(int i = 0; i < state.voices; i++) {
+      //  noteOn(i, seq[step], 100);
+      //  pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
+      //}
+      playChord(seq[step], 3, true);
     if (state.currentTick == TICKS_PER_STEP-1)
-      for(int i = 0; i < state.voices; i++) {
-        noteOff(i, seq[step]);
-    }
+      //for(int i = 0; i < state.voices; i++) {
+      //  noteOff(i, seq[step]);
+      //}
+      playChord(seq[step], 3, false);
   }
+}
+
+void Sequencer::playChord(int pitch, int numNotes, bool gate)
+{
+    for (int j=0; j<numNotes; j++)
+    {
+      for(int i = 0; i < state.voices; i++) {
+        int degree = (j*2)%SCALE_SIZE;
+        int octaves = (j*2-degree)/SCALE_SIZE;
+        if (gate) {
+          noteOn(i, pitch+12*octaves+minor_scaleI[degree], 100);
+          pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
+        } else {
+          noteOff(i, pitch+12*octaves+minor_scaleI[degree]);
+        }
+      }
+    }
 }
 
 void Sequencer::initSequence(void)
