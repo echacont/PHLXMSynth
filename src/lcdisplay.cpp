@@ -13,24 +13,21 @@ Lcdisp::Lcdisp(void)
   backlight();
   home();
   print("PHLXM was born");
-  write(LCD_NOTE1_SYMBOL);
-  delay(1081);
+  delay(381);
   clear();
 }
 
 void Lcdisp::update(synthProgram_t program, 
-                    controllerMode_t controlMode, 
-                    controllerStatus_t status,
-                    int* seq,
-                    int root)
+                    controllerMode_t mode, 
+                    controllerStatus_t status)
 {
   home();
-  switch(controlMode.menu)
+  switch(mode.menu)
   {         /*  LCD columns  */
     case PC:/*123456789012345*/
       print("Prog 1  2  3  4");
       setCursor(0,1);
-      print(controlMode.pointer+1); write(LCD_SPACE_SYMBOL);
+      print(mode.pointer+1); write(LCD_SPACE_SYMBOL);
       for (int i=0; i<NUM_UNISON_VOICES; i++) {
         setCursor(5+i*3,1);
         print(program.voiceProgram[i], HEX); write(LCD_SPACE_SYMBOL);
@@ -42,14 +39,25 @@ void Lcdisp::update(synthProgram_t program,
     case HARM_MODE:
       print("Harm            ");  
       break;
+
     case SEQ:
       print("Step"); write(LCD_SPACE_SYMBOL);
-      print(controlMode.pointer+1); write(LCD_SPACE_SYMBOL);
-      print(status.potValue[POT_1]>>4); write(LCD_SPACE_SYMBOL);
+      setCursor(6,0);
+      for (int i=0; i<NUM_STEPS0; i++) {
+        int code = LCD_0_SYMBOL+mode.pSeq[i];
+        write(code);
+      }
+      setCursor(15,0);
+      write(LCD_0_SYMBOL);
       setCursor(0,1);
-      for (int i=0; i<NUM_STEPS0; i++)
-        print(seq[i]-root+1);
+      print(mode.pointer); write(LCD_SPACE_SYMBOL);
+      setCursor(6,1);
+      for (int i=0; i<NUM_STEPS0; i++) 
+        if (i == mode.pointer) write(LCD_STAR_SYMBOL);
+        else write(LCD_SPACE_SYMBOL);
+      setCursor(15,1); write(LCD_0_SYMBOL+(status.potValue[POT_1]>>4));
       break;
+
     case FX:
       print("FX              ");
       break;

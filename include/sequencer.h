@@ -7,7 +7,6 @@
 #include <Fluxamasynth.h>
 #include "defines.h"
 
-
 // data structures
 /*
 struct Note {
@@ -18,7 +17,6 @@ struct Note {
   Note(void);
   setPitch(int p);
   setNote(int p, int v, int g, int s);
-
 }; 
 class Step 
 {
@@ -29,15 +27,12 @@ class Step
   Step();
   setStep(int step, int pitch);
 };
-
 */
-
 
 // sequencer control the synth so it 
 // derives from Fluxamasynth
 class Sequencer : private Fluxamasynth
 {
-
   private:
   public:
   // scales
@@ -67,7 +62,6 @@ class Sequencer : private Fluxamasynth
   void initSequence(int root);
   void progChange(synthProgram_t program);
   void playStep(int step);
-
 };
 
 #endif // PHLXM_SEQUENCER_H

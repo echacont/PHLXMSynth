@@ -14,19 +14,19 @@ class Controller
 {
   private:
   int buttonPins[NUM_BUTTONS];
-  bool buttondeBounce[NUM_DEBOUNCES][NUM_BUTTONS];;
+  bool buttondeBounce[NUM_DEBOUNCES][NUM_BUTTONS];
   public:
   controllerStatus_t status, status_prev;
-  controllerMode_t controlMode;
+  controllerMode_t mode;
   synthProgram_t program;
 
   // sequence parameters
-  int root;     // input note
+
 
   // constructor
   Controller(void);
   void updateStatus(void);        // see what input is being applied
-  void updateControl(int* seq);   // with the input, what is being controlled?
+  void updateMode();   // with the input, what is being controlled?
 };
 
 // PHLXM - top system class

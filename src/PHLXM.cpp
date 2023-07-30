@@ -9,17 +9,15 @@ void PHLXM::run(void)
 {
   leds.update(sq.sqLeds);
   contrl.updateStatus();          // reads controller into status
-  contrl.updateControl(sq.seq);   // what needs to be done. update program
+  contrl.updateMode();      // what needs to be done.
   sq.progChange(contrl.program);  // apply program change
-  //sq.initSequence(contrl.root);
+  //sq.initSequence(contrl.mode);
   disp.update(contrl.program,
-              contrl.controlMode,
-              contrl.status,
-              sq.seq,
-              contrl.root);
-
+              contrl.mode,
+              contrl.status);
 }
 
+/*--------------------------------------------------*/
 Controller::Controller(void)
 {
   buttonPins[BUTTON_0] = PIN_BUTTON_0;
@@ -42,18 +40,19 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  controlMode.menu = SEQ;
-  controlMode.trans = STOP;
-  controlMode.pointer = 0;
-  controlMode.count = 0;
+  mode.menu = SEQ;
+  mode.trans = STOP;
+  mode.pointer = 0;
+  mode.count = 0;
+  mode.root = DEFAULT_ROOT;
+  for (int i=0; i<NUM_STEPS0; i++)
+    mode.pSeq[i] = 1;
   // initialize a program
   program.bank = 0;
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
     program.voiceProgram[i] = INITIAL_PROGRAM;
   }
   program.update = true;
-
-  root = DEFAULT_ROOT;
 }
 
 void Controller::updateStatus(void)
@@ -92,22 +91,22 @@ void Controller::updateStatus(void)
   }
 }
 
-void Controller::updateControl(int* seq)
+void Controller::updateMode()
 {
   program.update = false;
-  if (controlMode.menu != controlMode.prev_menu)
-    controlMode.pointer = 0; // reset pointer if just entered menu
+  if (mode.menu != mode.prev_menu)
+    mode.pointer = 0; // reset pointer if just entered menu
   // state machine kinda
   // transport machine uses buttons 1 (STOP) and 2 (PLAY/PAUSE)
   // TODO: transport machine
-  switch (controlMode.menu)
+  switch (mode.menu)
   {
   case PC:  // program change
     if (status.potChanged[POT_0] == true) {
-      controlMode.pointer = status.potValue[POT_0]>>5; // get 2 MSB
+      mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB
     }
     if (status.potChanged[POT_1] == true) {
-      program.voiceProgram[controlMode.pointer] = status.potValue[POT_1]; // 7 bits
+      program.voiceProgram[mode.pointer] = status.potValue[POT_1]; // 7 bits
     }
     // Button 1 is Enter
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1])
@@ -116,10 +115,12 @@ void Controller::updateControl(int* seq)
   
   case SEQ:
     if (status.potChanged[POT_0] == true) {
-      controlMode.pointer = status.potValue[POT_0]>>3; // get 4 MSB
+      // get 3 MSB because sequencer has 8 steps
+      mode.pointer = status.potValue[POT_0]>>4; 
     }
     if (status.potChanged[POT_1] == true) {
-      seq[controlMode.pointer] = status.potValue[POT_1]>>4; // 3 bits
+      // 3 bits are needed to decode the scale up to an octave
+      //mode.pSeq[mode.pointer] = status.potValue[POT_1]>>4;
     }
     break;
 
@@ -128,11 +129,10 @@ void Controller::updateControl(int* seq)
   }
 
   // scroll the menu
-  if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0]) {
-    controlMode.prev_menu = controlMode.menu;
-    controlMode.menu = controlMode.menu+1;
-  }
-  if (controlMode.menu == last) controlMode.menu = 0;
+  if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0])
+    mode.menu = mode.menu+1;
+  if (mode.menu == last) mode.menu = 0;
+  mode.prev_menu = mode.menu;
 
   // clear potChanged and buttonChanged flags
   for (int i=0; i<NUM_POTS; i++)

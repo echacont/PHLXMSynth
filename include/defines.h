@@ -27,9 +27,10 @@
 #define COLUMS              20   //LCD columns
 #define ROWS                2    //LCD rows
 #define LCD_SPACE_SYMBOL    0x20 //space symbol from LCD ROM, see p.9 of GDM2004D datasheet
-#define LCD_NOTE1_SYMBOL    0x91
-// SEQUENCER
-#define NUM_STEPS0          16
+#define LCD_0_SYMBOL        0x30
+#define LCD_STAR_SYMBOL     0x2A
+  // SEQUENCER
+#define NUM_STEPS0          8
 #define MAX_NOTES           64
 #define TICKS_PER_STEP      4
 #define TICKS_PER_BEAT      4
@@ -60,6 +61,8 @@ struct controllerMode {
   transport_e trans;
   int pointer;
   int count;
+  int root;     // input note
+  int pSeq[NUM_STEPS0];
 }; 
 typedef struct controllerMode controllerMode_t;
 
