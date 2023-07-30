@@ -64,7 +64,7 @@ class Sequencer : private Fluxamasynth
 
   Sequencer(void);
   void tick(void);
-  void initSequences(int root);
+  void initSequence(int root);
   void progChange(synthProgram_t program);
   void playStep(int step);
 

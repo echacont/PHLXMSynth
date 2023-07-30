@@ -18,39 +18,11 @@ Lcdisp::Lcdisp(void)
   clear();
 }
 
-void Lcdisp::update(int value)
-{
-  home();
-  setCursor(0,1);
-  print(value);
-  write(LCD_SPACE_SYMBOL);
-}
-void Lcdisp::update(int value1, int value2)
-{
-  home();
-  setCursor(0,1);
-  print(value1);
-  write(LCD_SPACE_SYMBOL);
-  setCursor(3,1);
-  print(value2);
-  write(LCD_SPACE_SYMBOL);
-}
-
-void Lcdisp::update(int value1, int value2, int value3)
-{
-  home();
-  setCursor(0,1);
-  print(value1);
-  write(LCD_SPACE_SYMBOL);
-  setCursor(3,1);
-  print(value2);
-  write(LCD_SPACE_SYMBOL);
-  setCursor(6,1);
-  print(value3);
-  write(LCD_SPACE_SYMBOL);
-}
-
-void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode, controllerStatus_t status)
+void Lcdisp::update(synthProgram_t program, 
+                    controllerMode_t controlMode, 
+                    controllerStatus_t status,
+                    int* seq,
+                    int root)
 {
   home();
   switch(controlMode.menu)
@@ -58,12 +30,10 @@ void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode, contro
     case PC:/*123456789012345*/
       print("Prog 1  2  3  4");
       setCursor(0,1);
-      print(controlMode.pointer+1);
-      write(LCD_SPACE_SYMBOL);
+      print(controlMode.pointer+1); write(LCD_SPACE_SYMBOL);
       for (int i=0; i<NUM_UNISON_VOICES; i++) {
         setCursor(5+i*3,1);
-        print(program.voiceProgram[i], HEX);
-        write(LCD_SPACE_SYMBOL);
+        print(program.voiceProgram[i], HEX); write(LCD_SPACE_SYMBOL);
       }
       break;
     case SPREAD:
@@ -73,7 +43,12 @@ void Lcdisp::update(synthProgram_t program, controllerMode_t controlMode, contro
       print("Harm            ");  
       break;
     case SEQ:
-      print("Sequ            ");
+      print("Step"); write(LCD_SPACE_SYMBOL);
+      print(controlMode.pointer+1); write(LCD_SPACE_SYMBOL);
+      print(status.potValue[POT_1]>>4); write(LCD_SPACE_SYMBOL);
+      setCursor(0,1);
+      for (int i=0; i<NUM_STEPS0; i++)
+        print(seq[i]-root+1);
       break;
     case FX:
       print("FX              ");

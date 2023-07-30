@@ -23,10 +23,11 @@ class Lcdisp : private LiquidCrystal_I2C
   public:
   Lcdisp(void);
   void update(void);
-  void update(int value);
-  void update(int value1, int value2);
-  void update(int value1, int value2, int value3);
-  void update(synthProgram_t program, controllerMode_t controlMode, controllerStatus_t status);
+  void update(synthProgram_t program, 
+              controllerMode_t controlMode, 
+              controllerStatus_t status,
+              int* seq,
+              int root);
 };
 
 class Leds

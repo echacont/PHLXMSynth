@@ -27,7 +27,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
     setReverb(i, 7, 72, 72);
   }
 
-  initSequences(DEFAULT_ROOT);
+  initSequence(DEFAULT_ROOT);
 }
 
 void Sequencer::tick(void)
@@ -58,9 +58,9 @@ void Sequencer::playStep(int step)
   }
 }
 
-void Sequencer::initSequences(int root)
+void Sequencer::initSequence(int root)
 {
-  int interval = 0;
+/*int interval = 0;
   int degree = 0;
   int scaleSize = SCALE_SIZE;
   for(int step = 0; step < NUM_STEPS0; step++) {
@@ -68,8 +68,11 @@ void Sequencer::initSequences(int root)
     if (step == 0) interval = 0;
     else interval = interval+minor_scale1[degree];
     seq[step]= root+interval;
-  } 
+  } */
+  for(int step = 0; step < NUM_STEPS0; step++)
+    seq[step]= root;
 }
+
 void Sequencer::progChange(synthProgram_t program)
 {
   if (program.update == true) 
