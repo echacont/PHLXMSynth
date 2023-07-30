@@ -29,6 +29,10 @@
 #define LCD_SPACE_SYMBOL    0x20 //space symbol from LCD ROM, see p.9 of GDM2004D datasheet
 #define LCD_0_SYMBOL        0x30
 #define LCD_STAR_SYMBOL     0x2A
+#define LCD_SQUARE_SYMBOL   0xDB
+#define LCD_RIGHT_SYMBOL    0x7E
+#define LCD_LEFT_SYMBOL    0x7F
+
   // SEQUENCER
 #define NUM_STEPS0          8
 #define MAX_NOTES           64

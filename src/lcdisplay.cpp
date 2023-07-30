@@ -26,9 +26,17 @@ void Lcdisp::update(synthProgram_t program,
   switch(mode.menu)
   {         /*  LCD columns  */
     case PC:/*123456789012345*/
-      print("Prog 1  2  3  4");
-      setCursor(0,1);
-      print(mode.pointer+1); write(LCD_SPACE_SYMBOL);
+      print("Prog"); //write(LCD_SPACE_SYMBOL);
+      setCursor(5,0);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        write(LCD_0_SYMBOL+i+1);
+        if (i == mode.pointer) write(LCD_STAR_SYMBOL);
+        else write(LCD_SPACE_SYMBOL);
+        write(LCD_SPACE_SYMBOL);
+      }
+      setCursor(2,1);
+      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
+      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
       for (int i=0; i<NUM_UNISON_VOICES; i++) {
         setCursor(5+i*3,1);
         print(program.voiceProgram[i], HEX); write(LCD_SPACE_SYMBOL);

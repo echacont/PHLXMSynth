@@ -41,7 +41,7 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = SEQ;
+  mode.menu = PC;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.option = 0;
@@ -108,11 +108,14 @@ void Controller::updateMode()
       mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB
     }
     if (status.potChanged[POT_1] == true) {
-      program.voiceProgram[mode.pointer] = status.potValue[POT_1]; // 7 bits
+      mode.option = status.potValue[POT_1]; // 7 bits
     }
     // Button 1 is Enter
-    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1])
+    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
+      program.voiceProgram[mode.pointer] = mode.option;
       program.update = true;
+    }
+
     break;
   
   case SEQ:
