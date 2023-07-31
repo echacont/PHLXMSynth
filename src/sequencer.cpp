@@ -22,7 +22,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
 
   for (int i=0; i<NUM_LEDS; i++) sqLeds[i] = false;
   
-  setMasterVolume(72);
+  //setMasterVolume(72);
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
     setChannelVolume(i, 32);  
@@ -137,8 +137,9 @@ void Sequencer::progChange(synthProgram_t program)
     for (int i=0; i<NUM_UNISON_VOICES; i++) {
       programChange(program.bank, i, program.voiceProgram[i]);
     }
+    setMasterVolume(program.masterVol);
   }
-  program.update = false;
+  // program.update flag is cleared by the same method that sets it
 }
 
 

@@ -53,8 +53,9 @@ void Lcdisp::update(synthProgram_t program,
       setCursor(0,1);
       if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
       print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
-      printPointer(mode.pointer, 0, 3, 1);   
-      setCursor(6,1); //print(state.);
+      printPointer(mode.pointer, 0, 3, 1);
+      print(program.masterVol, HEX);
+      setCursor(6,1);
       printPointer(mode.pointer, 1, 7, 1);
       printPointer(mode.pointer, 2, 10, 1);
       printPointer(mode.pointer, 3, 13, 1);

@@ -46,6 +46,7 @@
 #define UNISON_PITCH_SPREAD 320
 #define UNISON_PAN_SPREAD   20
 #define INITIAL_PROGRAM     32
+#define INITIAL_MASTER_VOL  72
 
 // music defines
 #define SCALE_SIZE          7

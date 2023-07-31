@@ -7,8 +7,8 @@ PHLXM::PHLXM(void)
 
 void PHLXM::run(void)
 {
-  sq.updateSequencer(contrl.mode); // apply user sequence
   sq.progChange(contrl.program);  // apply program change
+  sq.updateSequencer(contrl.mode); // apply user sequence
   
   leds.update(sq.sqLeds);
   disp.update(contrl.program,
@@ -64,6 +64,7 @@ Controller::Controller(void)
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
     program.voiceProgram[i] = INITIAL_PROGRAM;
   }
+  program.masterVol = INITIAL_MASTER_VOL;
   program.update = true;
 }
 
@@ -140,7 +141,6 @@ void Controller::updateMode()
       program.voiceProgram[mode.pointer] = mode.option;
       program.update = true;
     }
-
     break;
   
   case SEQ:
@@ -201,8 +201,6 @@ void Controller::updateMode()
     } 
     if (status.potChanged[POT_1] == true) {
       if (mode.pointer == 0) // Volume
-        // cannot be zero (could be interpreted as silence by sequencer)
-        // this can be source of bugs in the future
         mode.option = status.potValue[POT_1];
       else if (mode.pointer == 3) // BPM
         mode.option = status.potValue[POT_1];
@@ -213,7 +211,10 @@ void Controller::updateMode()
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
       switch (mode.pointer)
       {
-        case 0: break;
+        case 0: 
+          program.masterVol = mode.option;
+          program.update = true;
+          break;
         case 1: break;
         case 2: break;
         case 3: 
