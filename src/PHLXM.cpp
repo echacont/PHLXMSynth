@@ -20,6 +20,7 @@ void PHLXM::run(void)
 }
 
 /*--------------------------------------------------*/
+
 Controller::Controller(void)
 {
   buttonPins[BUTTON_0] = PIN_BUTTON_0;
@@ -52,8 +53,9 @@ Controller::Controller(void)
   mode.chordStep = CHORD_STEP;
   mode.numChordNotes = NUM_CHORD_NOTES;
   mode.allNotesOff = false;
-  mode.tempoChange = false;
   mode.tempo = BASE_TEMPO;
+  mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
+  mode.tempoChange = true;
   for (int i=0; i<NUM_STEPS0; i++)
     mode.pSeq[i] = 1;
   mode.updateSeq = false;
@@ -67,6 +69,12 @@ Controller::Controller(void)
 
 void Controller::updateStatus(void)
 {
+  // clear potChanged and buttonChanged flags
+  for (int i=0; i<NUM_POTS; i++)
+    status.potChanged[i] = false;
+  for (int i=0; i<NUM_BUTTONS; i++)
+    status.buttonChanged[i] = false;
+
   // potentiometers
   for (int i = 0; i<NUM_POTS; i++) {
     status.potValue[i] = analogRead(i)>>3;
@@ -103,15 +111,18 @@ void Controller::updateStatus(void)
 
 void Controller::updateMode()
 {
+  // clear flags and reset pointer and option artifacts
   if (mode.menuChanged) {
     mode.pointer = 0; // reset pointer if just entered menu
     mode.option = 0;
     mode.menuChanged = false;
   }
-
   program.update = false;
   mode.allNotesOff = false;
-  mode.tempoChange = false;
+  // tempoChange is cleared when it is consumed by timer interrupt
+  // routine  tick() (main.cpp)
+  // mode.tempoChange = false;
+
   // state machine kinda
   // transport machine uses buttons 1 (STOP) and 2 (PLAY/PAUSE)
   // TODO: transport machine
@@ -207,12 +218,11 @@ void Controller::updateMode()
         case 2: break;
         case 3: 
           mode.tempo = mode.option + BASE_TEMPO;
+          mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
           mode.tempoChange = true;
           break;
       }
     }
-
-    mode.tempoChange = true;
     break;
 
   default:
@@ -247,10 +257,15 @@ void Controller::updateMode()
     }
   }
 
-  // clear potChanged and buttonChanged flags
-  for (int i=0; i<NUM_POTS; i++)
-    status.potChanged[i] = false;
-  for (int i=0; i<NUM_BUTTONS; i++)
-    status.buttonChanged[i] = false;
 
+}
+
+int Controller::getMillisPerTick(void) 
+{
+  if (mode.tempoChange) {
+    mode.tempoChange = false;
+    return mode.millisPerTick;
+  } else {
+    return 0;
+  }
 }

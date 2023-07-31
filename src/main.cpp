@@ -1,31 +1,29 @@
+// echacont
+// PHLXM sequencer->synth
 #include <Arduino.h>
 #include <MsTimer2.h>
-
-#include "defines.h"
 #include "PHLXM.h"
-#include "lcdisplay.h"
 
+// TODO: move timer interrupt code to the PHLXM/Sequencer class maybe
 
 PHLXM* phlxm = NULL;
 
 void tick ()
 {
   phlxm->sq.tick();
-  if (phlxm->contrl.mode.tempoChange) {
+  int millisPerTick = phlxm->contrl.getMillisPerTick();
+  if (millisPerTick) {
     MsTimer2::stop();
-    MsTimer2::set(phlxm->sq.state.millisPerTick, tick);
+    MsTimer2::set(millisPerTick, tick);
     MsTimer2::start();
   }
 }
-
-// TODO: move timer interrupt code to the PHLXM/Sequencer class maybe
 void setup () 
 {
   phlxm = new PHLXM();
-  MsTimer2::set(phlxm->sq.state.millisPerTick, tick);
+  MsTimer2::set(phlxm->contrl.mode.millisPerTick, tick);
   MsTimer2::start();
 }
-
 void loop () 
 {
   phlxm->run();

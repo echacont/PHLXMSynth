@@ -66,6 +66,7 @@ struct controllerMode {
   mode_e menu;
   transport_e trans;
   int tempo;
+  int millisPerTick;
   bool tempoChange;
   // user interface
   bool menuChanged;

@@ -10,12 +10,10 @@
 Sequencer::Sequencer(void) : Fluxamasynth()
 {
   // some of this can be removed as state is updated from mode first thing after setup()
-  //state.tempo = BASE_TEMPO;
   state.trans = STOP;
   state.voices = NUM_UNISON_VOICES;
   state.spread = UNISON_PITCH_SPREAD;
-  state.panspread = UNISON_PAN_SPREAD;
-  state.millisPerTick = 60000/(state.tempo*TICKS_PER_BEAT); // 250    
+  state.panspread = UNISON_PAN_SPREAD;  
   state.currentTick = 0;
   state.currentStep = 0;
   state.root = DEFAULT_ROOT;
@@ -120,7 +118,6 @@ void Sequencer::updateSequencer(controllerMode_t mode)
       if (mode.pSeq[i] == 0) seq[i] = 0;
       else seq[i] = (mode.pSeq[i]-1)+state.root;
   }
-  mode.updateSeq = false;
 
   if (mode.allNotesOff) 
     for(int i = 0; i < 16; i++)
@@ -129,10 +126,8 @@ void Sequencer::updateSequencer(controllerMode_t mode)
   // transport
   state.trans = mode.trans;
   // tempo bpm
-  if (mode.tempoChange) {
-    state.tempo = mode.tempo;
-    state.millisPerTick = 60000/(state.tempo*TICKS_PER_BEAT);
-  }
+  if (mode.tempoChange) state.tempo = mode.tempo;
+
 }
 
 void Sequencer::progChange(synthProgram_t program)
@@ -145,6 +140,7 @@ void Sequencer::progChange(synthProgram_t program)
   }
   program.update = false;
 }
+
 
 
 /*

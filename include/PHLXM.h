@@ -20,13 +20,11 @@ class Controller
   controllerMode_t mode;
   synthProgram_t program;
 
-  // sequence parameters
-
-
   // constructor
   Controller(void);
   void updateStatus(void);        // see what input is being applied
-  void updateMode();   // with the input, what is being controlled?
+  void updateMode(void);   // with the input, what is being controlled?
+  int getMillisPerTick(void);
 };
 
 // PHLXM - top system class
