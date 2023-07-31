@@ -44,7 +44,6 @@ Controller::Controller(void)
 
   // initialize the controller mode
   mode.menu = GEN;
-  mode.menuChanged = true;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.option = 0;
@@ -52,19 +51,24 @@ Controller::Controller(void)
   mode.root = DEFAULT_ROOT;
   mode.chordStep = CHORD_STEP;
   mode.numChordNotes = NUM_CHORD_NOTES;
-  mode.allNotesOff = false;
   mode.tempo = BASE_TEMPO;
   mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
-  mode.tempoChange = true;
   for (int i=0; i<NUM_STEPS0; i++)
     mode.pSeq[i] = 1;
-  mode.updateSeq = false;
+  mode.spread = UNISON_PITCH_SPREAD;
+  // flags
+  mode.menuChanged = true;
+  mode.updateSeq = true;
+  mode.tempoChange = true;
+  mode.allNotesOff = false;
+
   // initialize a program
-  program.bank = 0;
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
     program.voiceProgram[i] = INITIAL_PROGRAM;
   }
+  program.bank = 0;
   program.masterVol = INITIAL_MASTER_VOL;
+  program.panspread = UNISON_PAN_SPREAD; 
   program.update = true;
 }
 
@@ -120,6 +124,7 @@ void Controller::updateMode()
   }
   program.update = false;
   mode.allNotesOff = false;
+  mode.updateSeq = false;
   // tempoChange is cleared when it is consumed by timer interrupt
   // routine  tick() (main.cpp)
   // mode.tempoChange = false;
@@ -200,11 +205,9 @@ void Controller::updateMode()
       mode.pointer = status.potValue[POT_0]>>5; 
     } 
     if (status.potChanged[POT_1] == true) {
-      if (mode.pointer == 0) // Volume
+      if ((mode.pointer == 0) || (mode.pointer == 3)) // Volume or BPM
         mode.option = status.potValue[POT_1];
-      else if (mode.pointer == 3) // BPM
-        mode.option = status.potValue[POT_1];
-      else
+      else // Detune (spread) or Pan spread
         // get 8 options
         mode.option = status.potValue[POT_1]>>4;
     }
@@ -215,8 +218,15 @@ void Controller::updateMode()
           program.masterVol = mode.option;
           program.update = true;
           break;
-        case 1: break;
-        case 2: break;
+        case 1: 
+          // shift left 6 bits to get full bend range of 512
+          mode.spread = mode.option<<6;
+          mode.updateSeq = true;
+          break;
+        case 2:
+          program.panspread = mode.option<<4;
+          program.update = true;
+          break;
         case 3: 
           mode.tempo = mode.option + BASE_TEMPO;
           mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);

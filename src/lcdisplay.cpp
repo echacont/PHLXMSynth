@@ -55,9 +55,10 @@ void Lcdisp::update(synthProgram_t program,
       print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
       printPointer(mode.pointer, 0, 3, 1);
       print(program.masterVol, HEX);
-      setCursor(6,1);
       printPointer(mode.pointer, 1, 7, 1);
+      print(state.spread>>6, HEX);
       printPointer(mode.pointer, 2, 10, 1);
+      print(program.panspread>>4, HEX);
       printPointer(mode.pointer, 3, 13, 1);
       if(mode.pointer == 3) print(mode.tempo, HEX); // should be state.tempo
       else { setCursor(13,1); print(state.tempo); write(LCD_SPACE_SYMBOL); }

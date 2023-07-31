@@ -12,8 +12,6 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   // some of this can be removed as state is updated from mode first thing after setup()
   state.trans = STOP;
   state.voices = NUM_UNISON_VOICES;
-  state.spread = UNISON_PITCH_SPREAD;
-  state.panspread = UNISON_PAN_SPREAD;  
   state.currentTick = 0;
   state.currentStep = 0;
   state.root = DEFAULT_ROOT;
@@ -22,7 +20,6 @@ Sequencer::Sequencer(void) : Fluxamasynth()
 
   for (int i=0; i<NUM_LEDS; i++) sqLeds[i] = false;
   
-  //setMasterVolume(72);
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
     setChannelVolume(i, 32);  
@@ -30,8 +27,6 @@ Sequencer::Sequencer(void) : Fluxamasynth()
     setChorus(i, 6, 32, 80, 8 );
     setReverb(i, 7, 72, 72);
   }
-
-  initSequence();
 }
 
 void Sequencer::tick(void)
@@ -91,27 +86,13 @@ void Sequencer::playChord(int pitch, int numNotes, bool gate)
     }
 }
 
-void Sequencer::initSequence(void)
-{
-/*int interval = 0;
-  int degree = 0;
-  int scaleSize = SCALE_SIZE;
-  for(int step = 0; step < NUM_STEPS0; step++) {
-    degree = step%scaleSize;
-    if (step == 0) interval = 0;
-    else interval = interval+minor_scale1[degree];
-    seq[step]= root+interval;
-  } */
-  for(int step = 0; step < NUM_STEPS0; step++)
-    seq[step]= state.root;
-}
-
 void Sequencer::updateSequencer(controllerMode_t mode)
 {
   if (mode.updateSeq) {
     state.root = mode.root;
     state.chordStep = mode.chordStep;
     state.numChordNotes = mode.numChordNotes;
+    state.spread = mode.spread;
     for (int i=0; i<NUM_STEPS0; i++)
       // pSeq is scale degree based so 1 is root
       // Also, if 0 is found then it is preserved (silence)
@@ -136,13 +117,25 @@ void Sequencer::progChange(synthProgram_t program)
   {
     for (int i=0; i<NUM_UNISON_VOICES; i++) {
       programChange(program.bank, i, program.voiceProgram[i]);
+      pan(i,127-((i-NUM_UNISON_VOICES/2)*program.panspread));
     }
     setMasterVolume(program.masterVol);
   }
   // program.update flag is cleared by the same method that sets it
 }
 
-
+void Sequencer::initSequence(void)
+{
+/*int interval = 0;
+  int degree = 0;
+  int scaleSize = SCALE_SIZE;
+  for(int step = 0; step < NUM_STEPS0; step++) {
+    degree = step%scaleSize;
+    if (step == 0) interval = 0;
+    else interval = interval+minor_scale1[degree];
+    seq[step]= root+interval;
+  } */
+}
 
 /*
 Note::Note(void)

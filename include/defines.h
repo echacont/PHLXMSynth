@@ -44,7 +44,7 @@
 #define NUM_CHORD_NOTES     3
 #define CHORD_STEP          2
 #define UNISON_PITCH_SPREAD 320
-#define UNISON_PAN_SPREAD   20
+#define UNISON_PAN_SPREAD   32
 #define INITIAL_PROGRAM     32
 #define INITIAL_MASTER_VOL  72
 
@@ -75,6 +75,8 @@ struct controllerMode {
   int option;
   int counter;
   int numChordNotes;
+  int spread;     // unison detune using midi note bend
+  int panspread;
   // "MIDI input"
   int root;     // input note
   int chordStep;
@@ -94,6 +96,7 @@ struct Program_s
   int masterVol;
   int chorus;
   int reverb;
+  int panspread;
   bool update;
 };
 typedef struct Program_s synthProgram_t;
@@ -105,7 +108,7 @@ struct sequencerState {
   int chordStep;
   int numChordNotes;
   int voices;
-  int spread;
+  int spread;     // detune, total range 1024, middle is  512
   int panspread;
   int millisPerTick;
   int currentTick;
