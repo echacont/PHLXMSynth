@@ -9,8 +9,8 @@
 // sequencer constructor also calls base class constructor
 Sequencer::Sequencer(void) : Fluxamasynth()
 {
-  
-  state.tempo = BASE_TEMPO;
+  // some of this can be removed as state is updated from mode first thing after setup()
+  //state.tempo = BASE_TEMPO;
   state.trans = STOP;
   state.voices = NUM_UNISON_VOICES;
   state.spread = UNISON_PITCH_SPREAD;
@@ -19,7 +19,8 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   state.currentTick = 0;
   state.currentStep = 0;
   state.root = DEFAULT_ROOT;
-  state.chordStep = 2;
+  state.chordStep = CHORD_STEP;
+  state.numChordNotes = NUM_CHORD_NOTES;
 
   for (int i=0; i<NUM_LEDS; i++) sqLeds[i] = false;
   
@@ -39,14 +40,28 @@ void Sequencer::tick(void)
 {
   sqLeds[1] = !sqLeds[1];
 
-  playStep(state.currentStep);
-
-  state.currentTick++;
-  if (state.currentTick == TICKS_PER_STEP) 
+  switch (state.trans) 
   {
-    state.currentTick = 0;
-    state.currentStep++;
-    if (state.currentStep == NUM_STEPS0) state.currentStep = 0;
+    case PLAY:
+      playStep(state.currentStep);
+      state.currentTick++;
+      if (state.currentTick == TICKS_PER_STEP) 
+      {
+        state.currentTick = 0;
+        state.currentStep++;
+        if (state.currentStep == NUM_STEPS0) state.currentStep = 0;
+      }
+      sqLeds[0] = true;
+      break;
+    case PAUSE:
+      sqLeds[0] = !sqLeds[0];
+      state.currentTick = TICKS_PER_STEP-1;
+      break;
+    case STOP:
+      sqLeds[0] = false;
+      state.currentStep = 0;
+      state.currentTick = 0;
+      break;
   }
 }
 
@@ -55,16 +70,9 @@ void Sequencer::playStep(int step)
   if (seq[step] != 0)
   {
     if (state.currentTick == 0) 
-      //for(int i = 0; i < state.voices; i++) {
-      //  noteOn(i, seq[step], 100);
-      //  pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
-      //}
-      playChord(seq[step], 3, true);
+      playChord(seq[step], state.numChordNotes, true);
     if (state.currentTick == TICKS_PER_STEP-1)
-      //for(int i = 0; i < state.voices; i++) {
-      //  noteOff(i, seq[step]);
-      //}
-      playChord(seq[step], 3, false);
+      playChord(seq[step], state.numChordNotes, false);
   }
 }
 
@@ -73,8 +81,8 @@ void Sequencer::playChord(int pitch, int numNotes, bool gate)
     for (int j=0; j<numNotes; j++)
     {
       for(int i = 0; i < state.voices; i++) {
-        int degree = (j*2)%SCALE_SIZE;
-        int octaves = (j*2-degree)/SCALE_SIZE;
+        int degree = (j*state.chordStep)%SCALE_SIZE;
+        int octaves = (j*state.chordStep-degree)/SCALE_SIZE;
         if (gate) {
           noteOn(i, pitch+12*octaves+minor_scaleI[degree], 100);
           pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
@@ -104,6 +112,8 @@ void Sequencer::updateSequencer(controllerMode_t mode)
 {
   if (mode.updateSeq) {
     state.root = mode.root;
+    state.chordStep = mode.chordStep;
+    state.numChordNotes = mode.numChordNotes;
     for (int i=0; i<NUM_STEPS0; i++)
       // pSeq is scale degree based so 1 is root
       // Also, if 0 is found then it is preserved (silence)
@@ -111,6 +121,18 @@ void Sequencer::updateSequencer(controllerMode_t mode)
       else seq[i] = (mode.pSeq[i]-1)+state.root;
   }
   mode.updateSeq = false;
+
+  if (mode.allNotesOff) 
+    for(int i = 0; i < 16; i++)
+      allNotesOff(i);
+
+  // transport
+  state.trans = mode.trans;
+  // tempo bpm
+  if (mode.tempoChange) {
+    state.tempo = mode.tempo;
+    state.millisPerTick = 60000/(state.tempo*TICKS_PER_BEAT);
+  }
 }
 
 void Sequencer::progChange(synthProgram_t program)

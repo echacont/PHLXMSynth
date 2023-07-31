@@ -11,8 +11,14 @@ PHLXM* phlxm = NULL;
 void tick ()
 {
   phlxm->sq.tick();
+  if (phlxm->contrl.mode.tempoChange) {
+    MsTimer2::stop();
+    MsTimer2::set(phlxm->sq.state.millisPerTick, tick);
+    MsTimer2::start();
+  }
 }
 
+// TODO: move timer interrupt code to the PHLXM/Sequencer class maybe
 void setup () 
 {
   phlxm = new PHLXM();
@@ -24,15 +30,3 @@ void loop ()
 {
   phlxm->run();
 };
-
-/*
-void changeTempo(int pot)
-{
-  tempo = baseTempo+pot;
-  int millisPerTick = 60000/(tempo*ticksPerBeat);
-  MsTimer2::stop();
-  MsTimer2::set(millisPerTick, tick);
-  MsTimer2::start();
-}
-
-*/

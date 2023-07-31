@@ -33,8 +33,7 @@ void Lcdisp::update(synthProgram_t program,
       setCursor(5,0);
       for (int i=0; i<NUM_UNISON_VOICES; i++) {
         write(LCD_0_SYMBOL+i+1);
-        if (i == mode.pointer) write(LCD_STAR_SYMBOL);
-        else write(LCD_SPACE_SYMBOL);
+        printPointer(mode.pointer, i, 6+i*3, 0);
         write(LCD_SPACE_SYMBOL);
       }
       setCursor(2,1);
@@ -45,18 +44,47 @@ void Lcdisp::update(synthProgram_t program,
         print(program.voiceProgram[i], HEX); write(LCD_SPACE_SYMBOL);
       }
       break;
-    case SPREAD:
-      print("Sprd   bend pan ");
-      break;
-    case HARM_MODE:
-      setCursor(3,0); print("Root Step");
-      setCursor(0,1); 
+
+    case GEN:
+      setCursor(3,0); print("Vol");
+      setCursor(7,0); print("Dt");
+      setCursor(10,0); print("Pn");
+      setCursor(13,0); print("BPM");
+      setCursor(0,1);
       if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
-      print(mode.option, HEX); 
-      setCursor(2,1); write(LCD_RIGHT_SYMBOL);
-      setCursor(3,1); print(state.root, HEX);
-      //if (state.root )
-      setCursor(8,1); print(state.chordStep);
+      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
+      printPointer(mode.pointer, 0, 3, 1);   
+      setCursor(6,1); //print(state.);
+      printPointer(mode.pointer, 1, 7, 1);
+      printPointer(mode.pointer, 2, 10, 1);
+      printPointer(mode.pointer, 3, 13, 1);
+      if(mode.pointer == 3) print(mode.tempo, HEX); // should be state.tempo
+      else { setCursor(13,1); print(state.tempo); write(LCD_SPACE_SYMBOL); }
+      break;
+
+    case HARM_MODE:
+      setCursor(4,0);
+      print("Root");
+      setCursor(9,0);
+      print("St");
+      setCursor(12,0);
+      print("Nn");
+      setCursor(15,0);
+      print("O");
+      // TODO print the root note (A,A#,B,C,C#,D,D#,E,F,F#,G,G#)
+      setCursor(0,1);
+      if (mode.option>99)  print(mode.option);
+      else if (mode.option>9) { write(LCD_SPACE_SYMBOL); print(mode.option); }
+      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(mode.option);  }
+      setCursor(3,1); write(LCD_RIGHT_SYMBOL);
+      printPointer(mode.pointer, 0, 4, 1);   
+      setCursor(6,1); print(state.root);
+      printPointer(mode.pointer, 1, 9, 1);
+      setCursor(10,1);
+      print(state.chordStep);
+      printPointer(mode.pointer, 2, 12, 1);
+      print(state.numChordNotes,HEX);
+      printPointer(mode.pointer, 3, 15, 1);
       break;
 
     case SEQ:
@@ -65,12 +93,9 @@ void Lcdisp::update(synthProgram_t program,
       for (int i=0; i<NUM_STEPS0; i++)
         write(LCD_0_SYMBOL+mode.pSeq[i]);
       setCursor(15,0);write(LCD_0_SYMBOL+state.currentStep+1);
-      // TODO print the root note (A,A#,B,C,C#,D,D#,E,F,F#,G,G#)
-      setCursor(0,1); print("r "); print(mode.root); write(LCD_SPACE_SYMBOL);
       setCursor(6,1);
       for (int i=0; i<NUM_STEPS0; i++) 
-        if (i == mode.pointer) write(LCD_STAR_SYMBOL);
-        else write(LCD_SPACE_SYMBOL);
+        printPointer(mode.pointer, i, 6+i,1);
       setCursor(14,1); 
       write(LCD_LEFT_SYMBOL); write(LCD_0_SYMBOL+(mode.option));
       break;
@@ -82,6 +107,13 @@ void Lcdisp::update(synthProgram_t program,
       print("Go away!        ");
       break;
   }
+}
+
+void Lcdisp::printPointer(int p, int i, int col, int row)
+{
+  setCursor(col, row);
+  if (i == p) write(LCD_STAR_SYMBOL);
+  else write(LCD_SPACE_SYMBOL);
 }
 
 /*--------------------------------------------------*/
@@ -97,13 +129,7 @@ Leds::Leds(void)
   }
 }
 
-void Leds::update(void)
-{
-  for (int i = 0; i<NUM_LEDS; i++) {
-    if(status[i]) digitalWrite(pin[i], LOW);
-    else digitalWrite(pin[i], HIGH);
-  }
-}
+
 void Leds::update(bool leds[NUM_LEDS])
 {
   for (int i = 0; i<NUM_LEDS; i++) {
@@ -111,9 +137,4 @@ void Leds::update(bool leds[NUM_LEDS])
     if(status[i]) digitalWrite(pin[i], LOW);
     else digitalWrite(pin[i], HIGH);
   }
-}
-void Leds::update(int led, bool status)
-{
-  if(status) digitalWrite(pin[led], LOW);
-  else digitalWrite(pin[led], HIGH);
 }

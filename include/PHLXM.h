@@ -33,15 +33,15 @@ class Controller
 class PHLXM
 {
   private:
-  // controller
-  Controller contrl;
-  // LCD
-  Lcdisp disp;
-
   public:
-  Leds leds;
+  // controller
+  Controller contrl;  
   // sequencer
   Sequencer sq;
+  // LCD and LEDS
+  Lcdisp disp;
+  Leds leds;
+
   // constructor
   PHLXM(void);
   void run(void);

@@ -27,6 +27,7 @@ class Lcdisp : private LiquidCrystal_I2C
               controllerMode_t mode,
               sequencerState_t state); 
               //controllerStatus_t status); // this is here just for debug
+  void Lcdisp::printPointer(int p, int i, int col, int row);
 };
 
 class Leds
@@ -37,7 +38,6 @@ class Leds
   bool status[NUM_LEDS];
   // constructor
   Leds(void);
-  void update(void);
   void update(bool leds[]);
   void update(int led, bool status);
 };

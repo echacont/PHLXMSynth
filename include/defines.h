@@ -41,15 +41,17 @@
 #define BASE_TEMPO          60
 #define DEFAULT_ROOT        52  // E
 #define NUM_UNISON_VOICES   4
+#define NUM_CHORD_NOTES     3
+#define CHORD_STEP          2
 #define UNISON_PITCH_SPREAD 320
 #define UNISON_PAN_SPREAD   20
-#define INITIAL_PROGRAM     50
+#define INITIAL_PROGRAM     32
 
 // music defines
 #define SCALE_SIZE          7
 
 // enumerated types
-enum mode_e { SEQ, PC, SPREAD, HARM_MODE,  FX, last };
+enum mode_e { SEQ, PC, GEN, HARM_MODE,  FX, last };
 enum transport_e { STOP, PLAY, PAUSE };
 
 struct controllerStatus {
@@ -63,13 +65,18 @@ typedef struct controllerStatus controllerStatus_t;
 struct controllerMode {
   mode_e menu;
   transport_e trans;
+  int tempo;
+  bool tempoChange;
   // user interface
   bool menuChanged;
   int pointer;
   int option;
+  int counter;
+  int numChordNotes;
   // "MIDI input"
   int root;     // input note
   int chordStep;
+  bool allNotesOff;
   // user sequence
   bool updateSeq;
   int pSeq[NUM_STEPS0];
@@ -91,9 +98,10 @@ typedef struct Program_s synthProgram_t;
 
 struct sequencerState {
   transport_e trans;
-  int tempo;
+  int tempo;  // rename to bpm
   int root;
   int chordStep;
+  int numChordNotes;
   int voices;
   int spread;
   int panspread;
