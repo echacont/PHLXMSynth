@@ -52,7 +52,7 @@
 #define SCALE_SIZE          7
 
 // enumerated types
-enum mode_e { SEQ, PC, GEN, HARM_MODE,  FX, last };
+enum mode_e { PC, GEN, MIX, SEQ, HARM_MODE, SEQ_MODE, CHORUS, REVERB, last };
 enum transport_e { STOP, PLAY, PAUSE };
 
 struct controllerStatus {
@@ -94,8 +94,13 @@ struct Program_s
   int voicePan[NUM_UNISON_VOICES];
   int voiceVol[NUM_UNISON_VOICES];
   int masterVol;
-  int chorus;
-  int reverb;
+  // FX
+  int chorusType[NUM_UNISON_VOICES];
+  int chorusLevel[NUM_UNISON_VOICES];
+  int chorusFdbk[NUM_UNISON_VOICES];
+  int reverbType[NUM_UNISON_VOICES];
+  int reverbLevel[NUM_UNISON_VOICES];
+  int reverbFdbk[NUM_UNISON_VOICES];
   int panspread;
   bool update;
 };

@@ -23,7 +23,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
     setChannelVolume(i, 32);  
-    pan(i,127-((i-state.voices/2)*state.panspread));
+    //pan(i,127-((i-state.voices/2)*state.panspread));
     setChorus(i, 6, 32, 80, 8 );
     setReverb(i, 7, 72, 72);
   }
@@ -80,7 +80,7 @@ void Sequencer::playChord(int pitch, int numNotes, bool gate)
           noteOn(i, pitch+12*octaves+minor_scaleI[degree], 100);
           pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
         } else {
-          noteOff(i, pitch+12*octaves+minor_scaleI[degree]);
+          //noteOff(i, pitch+12*octaves+minor_scaleI[degree]);
         }
       }
     }

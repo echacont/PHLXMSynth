@@ -21,7 +21,6 @@ Lcdisp::Lcdisp(void)
 void Lcdisp::update(synthProgram_t program, 
                     controllerMode_t mode, 
                     sequencerState_t state)
-                   // controllerStatus_t status) // get rid of this
 {
   home();
   if (mode.menuChanged) clear();
@@ -79,8 +78,11 @@ void Lcdisp::update(synthProgram_t program,
       else if (mode.option>9) { write(LCD_SPACE_SYMBOL); print(mode.option); }
       else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(mode.option);  }
       setCursor(3,1); write(LCD_RIGHT_SYMBOL);
-      printPointer(mode.pointer, 0, 4, 1);   
-      setCursor(6,1); print(state.root);
+      printPointer(mode.pointer, 0, 4, 1);
+      if (state.root>99)  print(state.root);
+      else if (state.root>9) { write(LCD_SPACE_SYMBOL); print(state.root); }
+      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(state.root);  }
+      //setCursor(6,1); print(state.root);
       printPointer(mode.pointer, 1, 9, 1);
       setCursor(10,1);
       print(state.chordStep);
@@ -102,11 +104,24 @@ void Lcdisp::update(synthProgram_t program,
       write(LCD_LEFT_SYMBOL); write(LCD_0_SYMBOL+(mode.option));
       break;
 
-    case FX:
-      print("FX              ");
+    case SEQ_MODE:
+      print("Seq Mode");
       break;
+
+    case MIX:
+      print("Mixer");
+      break;
+
+    case CHORUS:
+      print("Chorus");
+      break;
+
+    case REVERB:
+      print("Reverb");
+      break;
+
     default:
-      print("Go away!        ");
+      print("Rabit hole");
       break;
   }
 }
