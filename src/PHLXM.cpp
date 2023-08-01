@@ -9,16 +9,19 @@ PHLXM::PHLXM(void)
 
 void PHLXM::run(void)
 {
-  sq.progChange(contrl.program);  // apply program change
-  sq.updateSequencer(contrl.mode); // apply user sequence
+  // right after the model constructors run at main::setup(), 
+  // update synth program and sequencer state. Then get controller data, 
+  // apply changes to models and come around again (and again and again....)
+  sq.progChange(contrl.program);   // apply program change
+  sq.updateSequencer(contrl.mode);// apply user sequence
   
-  leds.update(sq.sqLeds);
-  disp.update(contrl.program,
+  leds.update(sq.sqLeds);         // leds driven by sequencer
+  disp.update(contrl.program,     // LCD has a lot of stuff to show
               contrl.mode,
               sq.state);
 
-  contrl.updateStatus();          // reads controller into status
-  contrl.updateMode();      // what needs to be done.
+  contrl.updateStatus();   // reads controller into status (user input)
+  contrl.updateMode();    // what needs to be done? Do it.
 }
 
 /*--------------------------------------------------*/
@@ -132,8 +135,6 @@ void Controller::updateMode()
   // mode.tempoChange = false;
 
   // state machine kinda
-  // transport machine uses buttons 1 (STOP) and 2 (PLAY/PAUSE)
-  // TODO: transport machine
   switch (mode.menu)
   {
   case PC:  // program change
@@ -250,7 +251,9 @@ void Controller::updateMode()
   }
   if (mode.menu == last) mode.menu = 0;
 
-  // transport
+
+  // transport machine
+  // transport machine uses button 2 for (PASE/STOP) and (PLAY)
   if(status.buttonChanged[BUTTON_2]) //} && status.buttonValue[BUTTON_0])
   {
     switch (mode.trans)
