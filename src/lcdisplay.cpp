@@ -1,5 +1,6 @@
-// echacont
 // PHLXM liquid crystal display source file
+// Copyright 2023 Eleonora Chacón Taylor
+// This program is distributed under the terms of the GNU General Public License v3
 
 #include "lcdisplay.h"
 #include "PHLXM.h"

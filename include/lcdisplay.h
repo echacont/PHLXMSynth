@@ -1,5 +1,6 @@
-// echacont
 // PHLXM liquid crystal display header file
+// Copyright 2023 Eleonora Chacón Taylor
+// This program is distributed under the terms of the GNU General Public License v3
 
 #ifndef LCDISPLAY_H
 #define LCDISPLAY_H

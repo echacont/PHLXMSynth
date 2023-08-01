@@ -1,5 +1,6 @@
-// echacont
-// FLXMSynth_seq defines file
+// PHLXM sequencer->synth defines file
+// Copyright 2023 Eleonora Chacón Taylor
+// This program is distributed under the terms of the GNU General Public License v3
 
 #ifndef DEFINES_H
 #define DEFINES_H

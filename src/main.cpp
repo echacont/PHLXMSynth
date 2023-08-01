@@ -1,5 +1,7 @@
-// echacont
-// PHLXM sequencer->synth
+// PHLXM sequencer->synth main.cpp
+// Copyright 2023 Eleonora Chacón Taylor
+// This program is distributed under the terms of the GNU General Public License v3
+
 #include <Arduino.h>
 #include <MsTimer2.h>
 #include "PHLXM.h"

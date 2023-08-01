@@ -1,5 +1,6 @@
-// echacont
 // PHLXM sequencer header file
+// Copyright 2023 Eleonora Chacón Taylor
+// This program is distributed under the terms of the GNU General Public License v3
 
 #ifndef PHLXM_SEQUENCER_H
 #define PHLXM_SEQUENCER_H
