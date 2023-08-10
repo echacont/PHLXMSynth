@@ -26,8 +26,7 @@ class Lcdisp : private LiquidCrystal_I2C
   void update(void);
   void update(synthProgram_t program, 
               controllerMode_t mode,
-              sequencerState_t state,
-              extMIDIState_t midiState); 
+              sequencerState_t state); 
   void Lcdisp::printPointer(int p, int i, int col, int row);
 };
 

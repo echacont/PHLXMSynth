@@ -7,7 +7,7 @@
 PHLXM::PHLXM(void)
 { }
 
-void PHLXM::run(extMIDIState_t midiState)
+void PHLXM::run(extFlags_t flags)
 {
   // right after the model constructors run at main::setup(), 
   // update synth program and sequencer state. Then get controller data, 
@@ -15,11 +15,12 @@ void PHLXM::run(extMIDIState_t midiState)
   sq.progChange(contrl.program);   // apply program change
   sq.updateSequencer(contrl.mode);// apply user sequence
   
-  leds.update(sq.sqLeds);         // leds driven by sequencer
-  disp.update(contrl.program,     // LCD has a lot of stuff to show
-              contrl.mode,
-              sq.state,
-              midiState);
+  if (flags.updateDisplay) {
+    leds.update(sq.sqLeds);         // leds driven by sequencer
+    disp.update(contrl.program,     // LCD has a lot of stuff to show
+                contrl.mode,
+                sq.state);        
+  }
 
   contrl.updateStatus();   // reads controller into status (user input)
   contrl.updateMode();    // what needs to be done? Do it.

@@ -21,8 +21,7 @@ Lcdisp::Lcdisp(void)
 
 void Lcdisp::update(synthProgram_t program, 
                     controllerMode_t mode, 
-                    sequencerState_t state,
-                    extMIDIState_t midiState)
+                    sequencerState_t state)
 {
   home();
   if (mode.menuChanged) clear();
@@ -58,17 +57,11 @@ void Lcdisp::update(synthProgram_t program,
       print(program.masterVol, HEX);
       printPointer(mode.pointer, 1, 7, 1);
       print(state.spread>>6, HEX);
-      // External MIDI clock debug
-      //setCursor(10,1); print(midiState.millisPerTick); 
-      //write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL);
-      
       printPointer(mode.pointer, 2, 10, 1);
       print(program.panspread>>4, HEX);
       printPointer(mode.pointer, 3, 13, 1);
       //if(mode.pointer == 3) print(mode.tempo, HEX); // should be state.tempo
       //else { setCursor(13,1); print(state.tempo); write(LCD_SPACE_SYMBOL); }
-      
-
       break;
 
     case HARM_MODE:

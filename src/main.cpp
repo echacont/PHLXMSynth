@@ -13,48 +13,40 @@
 #define USE_TIMER_3                   false
 #define USE_TIMER_4                   false
 #define USE_TIMER_5                   false
-#define TIMER1_INTERVAL_MS            7
+#define TIMER1_INTERVAL_MS            10
+#define TIMER2_INTERVAL_MS            251
 
 #include <Arduino.h>
 #include "PHLXM.h"
 #include <TimerInterrupt.h>
 #include <MIDI.h>
 
-
-
 PHLXM*  phlxm = NULL;
-ExtMIDI* extmidi = NULL;
+extFlags_t flags;
+
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
 
-volatile bool runSequencerTick = false;
+void checkMIDI(void);
 
 // external midi
 void TimerHandler1()
 {
-  // make visible over GPIO for debug
-  static bool toggle1 = false;
-  //digitalWrite(53, toggle1);
-  toggle1 = !toggle1;
-  
-  extmidi->checkMIDI();
+  checkMIDI();
 }
 
-// internal sequencer
+// display refresh
 void TimerHandler2()
 {
-  runSequencerTick = true;
-  //getMillisPerTick returns zero if there's no change needed
-  int millisPerTick = phlxm->contrl.getMillisPerTick();
-  if (millisPerTick > 0)
-    ITimer2.attachInterruptInterval(millisPerTick, TimerHandler2, 0);
+  //flags.updateDisplay = true;
 }
 
 void setup () 
 {
   phlxm = new PHLXM();
-  extmidi = new ExtMIDI();
+  flags.updateDisplay = false;
+  flags.runSequencerTick = false;
 
-  // Initialize Hardware Serial (pins 1-2) for External MIDI
+  // Initialize External MIDI
   //Serial.begin(31250);
   MIDI.begin(MIDI_CHANNEL_OMNI);
   MIDI.turnThruOff();
@@ -65,25 +57,26 @@ void setup ()
   ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, TimerHandler1, 0);
 
   // Initialize Timer2 and attach ISR. 
-  // Timer2 will be used to clock the internal sequencer
-  // External MIDI clock then don't use internal clock
-  //ITimer2.init();
-  //ITimer2.attachInterruptInterval(phlxm->contrl.mode.millisPerTick, TimerHandler2, 0);
+  // Timer2 will be used to do display refresh
+  ITimer2.init();
+  ITimer2.attachInterruptInterval(TIMER2_INTERVAL_MS, TimerHandler2, 0);
+
+  phlxm->run(flags);
 }
 
 void loop () 
 {
-  phlxm->run(extmidi->midiState);
-  if (runSequencerTick) {
-    phlxm->sq.tick();
-    runSequencerTick = false;
+  //phlxm->run(flags);
+  flags.updateDisplay = false;
+  if (flags.runSequencerTick) {
+    //phlxm->sq.tick();
+    flags.runSequencerTick = false;
   }
 };
 
 /*-------------------------------------------------------------------------*/
 
-// TODO: maybe use the full MIDI library now?
-void ExtMIDI::checkMIDI() 
+void checkMIDI(void) 
 {
   static bool toggle3 = false;
   if(MIDI.read())
@@ -93,11 +86,13 @@ void ExtMIDI::checkMIDI()
       case midi::Clock:
         digitalWrite(53, toggle3);
         toggle3 = !toggle3;
-        runSequencerTick = true;    
+        flags.runSequencerTick = true;    
+        break;
+      default:
         break;
     }
   }
-
+}
 
   /* 
   do{
@@ -133,8 +128,9 @@ void ExtMIDI::checkMIDI()
       }
     }
   } while (Serial.available() > 0);//when at least three bytes available
-  */
+  
 }
+
 
 void ExtMIDI::initMIDIState(void)
 {
@@ -142,8 +138,9 @@ void ExtMIDI::initMIDIState(void)
   midiState.millisPerTick = 0;
   midiState.prevMillisPerQuarterNote = 0;
   midiState.changeMillisPerTick = false;
+  midiState.updateDisplay = false;
 }
-/*
+
 void ExtMIDI::handleSync(void)
 {
   midiState.millisPerTick++;

@@ -127,16 +127,12 @@ struct sequencerState {
 };
 typedef struct sequencerState sequencerState_t;
 
-// External MIDI state
-struct extMIDIState
+// External flags
+struct extFlags
 {
-  int midiTicks;
-  // milliseconds per sequencer tick (slower than MIDI tick)
-  int millisPerTick;
-  int prevMillisPerQuarterNote;
-  bool changeMillisPerTick;
-
+  bool runSequencerTick;
+  bool updateDisplay;
 };
-typedef struct extMIDIState extMIDIState_t;
+typedef struct extFlags extFlags_t;
 
 #endif // DEFINES_H
