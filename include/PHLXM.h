@@ -17,6 +17,7 @@ class Controller
   int buttonPins[NUM_BUTTONS];
   bool buttondeBounce[NUM_DEBOUNCES][NUM_BUTTONS];
   public:
+
   controllerStatus_t status, status_prev;
   controllerMode_t mode;
   synthProgram_t program;
@@ -43,7 +44,7 @@ class PHLXM
 
   // constructor
   PHLXM(void);
-  void run(void);
+  void run(extMIDIState_t);
   void tick(void);
 };
 

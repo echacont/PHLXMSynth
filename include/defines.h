@@ -49,6 +49,10 @@
 #define INITIAL_PROGRAM     32
 #define INITIAL_MASTER_VOL  72
 
+// MIDI
+#define MIDI_TICKS_PER_BEAT 24
+#define MIDI_STATUS_CLOCK   0xF8
+
 // music defines
 #define SCALE_SIZE          7
 
@@ -121,5 +125,17 @@ struct sequencerState {
   int currentStep;
 };
 typedef struct sequencerState sequencerState_t;
+
+// External MIDI state
+struct extMIDIState
+{
+  int midiTicks;
+  // milliseconds per sequencer tick (slower than MIDI tick)
+  int millisPerTick;
+  int prevMillisPerQuarterNote;
+  bool changeMillisPerTick;
+
+};
+typedef struct extMIDIState extMIDIState_t;
 
 #endif // DEFINES_H
