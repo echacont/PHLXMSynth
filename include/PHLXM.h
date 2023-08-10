@@ -10,6 +10,17 @@
 #include "sequencer.h"
 #include "lcdisplay.h"
 
+
+class ExtMIDI {
+  public:
+  extMIDIState_t midiState;
+  void initMIDIState(void);
+  ExtMIDI(HardwareSerial &s) { initMIDIState(); }
+  void checkMIDI(void);
+  //ExtMIDI(void);
+};
+
+
 // controller
 class Controller
 {
@@ -47,5 +58,9 @@ class PHLXM
   void run(extMIDIState_t);
   void tick(void);
 };
+
+
+
+
 
 #endif //PHLXM_H

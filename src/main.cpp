@@ -4,18 +4,22 @@
 
 // TODO: move timer interrupt code to the PHLXM/Sequencer class maybe
 
-#include <Arduino.h>
-#include <MsTimer2.h>
-#include "PHLXM.h"
+// Important:
+// Some of these defines need to exist before <TimerInterrupt.h> is loaded
+#define TIMER_INTERRUPT_DEBUG         0
+#define _TIMERINTERRUPT_LOGLEVEL_     0
+#define USE_TIMER_1                   true
+#define USE_TIMER_2                   true
+#define USE_TIMER_3                   false
+#define USE_TIMER_4                   false
+#define USE_TIMER_5                   false
+#define TIMER1_INTERVAL_MS            7
+#define TIMER2_INTERVAL_MS            200
 
-class ExtMIDI {
-  public:
-  extMIDIState_t midiState;
-  void initMIDIState(void);
-  ExtMIDI(HardwareSerial &s) { initMIDIState(); }
-  void checkMIDI(void);
-  //ExtMIDI(void);
-};
+
+#include <Arduino.h>
+#include "PHLXM.h"
+#include <TimerInterrupt.h>
 
 ExtMIDI* midi = NULL;
 
@@ -26,25 +30,62 @@ void tick ()
   phlxm->sq.tick();
   int millisPerTick = phlxm->contrl.getMillisPerTick();
   if (millisPerTick) {
-    MsTimer2::stop();
-    MsTimer2::set(millisPerTick, tick);
-    MsTimer2::start();
+    //MsTimer2::stop();
+    //MsTimer2::set(millisPerTick, tick);
+    //MsTimer2::start();
   }
+}
+
+// external midi
+void TimerHandler1()
+{
+  static bool toggle1 = false;
+
+  //timer interrupt toggles  GRN_LED
+  digitalWrite(6, toggle1);
+  digitalWrite(53, toggle1);
+  toggle1 = !toggle1;
+}
+
+// internal sequencer
+void TimerHandler2()
+{
+  phlxm->sq.tick();
+  // getMillisPerTick returns zero if there's no change needed
+  int millisPerTick = phlxm->contrl.getMillisPerTick();
+  if (millisPerTick > 0)
+    ITimer2.attachInterruptInterval(millisPerTick, TimerHandler2, 0);
+
+  // make visible over GPIO for debug
+  //static bool toggle2 = false;
+  //digitalWrite(51, toggle2);
+  //toggle2 = !toggle2;
 }
 
 void setup () 
 {
   phlxm = new PHLXM();
-  MsTimer2::set(phlxm->contrl.mode.millisPerTick, tick);
-  MsTimer2::start();
+  //MsTimer2::set(phlxm->contrl.mode.millisPerTick, tick);
+  //MsTimer2::start();
+
+  // Initialize Hardware Serial (pins 1-2) for External MIDI
   Serial.begin(31250);
   midi = new ExtMIDI(Serial);
+
+  // Initialize Timer1 and attach ISR. This will be used to keep track
+  // if incoming MIDI messages from the exterior, including clock messages.
+  ITimer1.init();
+  ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, TimerHandler1, 0);
+  // Initialize Timer2 and attach ISR. 
+  // Timer2 will be used to clock the internal sequencer
+  ITimer2.init();
+  ITimer2.attachInterruptInterval(phlxm->contrl.mode.millisPerTick, TimerHandler2, 0);
 }
 
 void loop () 
 {
   phlxm->run(midi->midiState);
-  midi->checkMIDI();
+  //midi->checkMIDI();
 };
 
 /*-------------------------------------------------------------------------*/
