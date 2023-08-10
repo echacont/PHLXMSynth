@@ -50,7 +50,7 @@ void Lcdisp::update(synthProgram_t program,
       setCursor(3,0); print("Vol");
       setCursor(7,0); print("Dt");
       setCursor(10,0); print("Pn");
-      setCursor(13,0); print("BPM");
+      //setCursor(13,0); print("BPM");
       setCursor(0,1);
       if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
       print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
@@ -59,15 +59,15 @@ void Lcdisp::update(synthProgram_t program,
       printPointer(mode.pointer, 1, 7, 1);
       print(state.spread>>6, HEX);
       // External MIDI clock debug
-      setCursor(10,1); print(midiState.millisPerTick); 
-      write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL);
-      /*
+      //setCursor(10,1); print(midiState.millisPerTick); 
+      //write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL);
+      
       printPointer(mode.pointer, 2, 10, 1);
       print(program.panspread>>4, HEX);
       printPointer(mode.pointer, 3, 13, 1);
-      if(mode.pointer == 3) print(mode.tempo, HEX); // should be state.tempo
-      else { setCursor(13,1); print(state.tempo); write(LCD_SPACE_SYMBOL); }
-      */
+      //if(mode.pointer == 3) print(mode.tempo, HEX); // should be state.tempo
+      //else { setCursor(13,1); print(state.tempo); write(LCD_SPACE_SYMBOL); }
+      
 
       break;
 

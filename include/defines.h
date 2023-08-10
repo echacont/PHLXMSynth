@@ -37,8 +37,8 @@
   // SEQUENCER
 #define NUM_STEPS0          8
 #define MAX_NOTES           64
-#define TICKS_PER_STEP      4
-#define TICKS_PER_BEAT      4
+#define TICKS_PER_STEP      24 
+#define TICKS_PER_BEAT      24  // used for millisPerTick calculations
 #define BASE_TEMPO          60
 #define DEFAULT_ROOT        52  // E
 #define NUM_UNISON_VOICES   4

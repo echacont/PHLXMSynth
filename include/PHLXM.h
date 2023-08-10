@@ -15,9 +15,9 @@ class ExtMIDI {
   public:
   extMIDIState_t midiState;
   void initMIDIState(void);
-  ExtMIDI(HardwareSerial &s) { initMIDIState(); }
+  //ExtMIDI(HardwareSerial &s) { initMIDIState(); }
   void checkMIDI(void);
-  //ExtMIDI(void);
+  ExtMIDI(void)  { initMIDIState(); }
 };
 
 

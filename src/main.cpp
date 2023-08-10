@@ -18,10 +18,15 @@
 #include <Arduino.h>
 #include "PHLXM.h"
 #include <TimerInterrupt.h>
+#include <MIDI.h>
 
-ExtMIDI* midi = NULL;
 
-PHLXM* phlxm = NULL;
+
+PHLXM*  phlxm = NULL;
+ExtMIDI* extmidi = NULL;
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
+
+volatile bool runSequencerTick = false;
 
 // external midi
 void TimerHandler1()
@@ -31,10 +36,8 @@ void TimerHandler1()
   //digitalWrite(53, toggle1);
   toggle1 = !toggle1;
   
-  midi->checkMIDI();
+  extmidi->checkMIDI();
 }
-
-volatile bool runSequencerTick = false;
 
 // internal sequencer
 void TimerHandler2()
@@ -49,15 +52,18 @@ void TimerHandler2()
 void setup () 
 {
   phlxm = new PHLXM();
+  extmidi = new ExtMIDI();
 
   // Initialize Hardware Serial (pins 1-2) for External MIDI
-  Serial.begin(31250);
-  midi = new ExtMIDI(Serial);
+  //Serial.begin(31250);
+  MIDI.begin(MIDI_CHANNEL_OMNI);
+  MIDI.turnThruOff();
 
   // Initialize Timer1 and attach ISR. This will be used to keep track
   // if incoming MIDI messages from the exterior, including clock messages.
   ITimer1.init();
   ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, TimerHandler1, 0);
+
   // Initialize Timer2 and attach ISR. 
   // Timer2 will be used to clock the internal sequencer
   // External MIDI clock then don't use internal clock
@@ -67,7 +73,7 @@ void setup ()
 
 void loop () 
 {
-  phlxm->run(midi->midiState);
+  phlxm->run(extmidi->midiState);
   if (runSequencerTick) {
     phlxm->sq.tick();
     runSequencerTick = false;
@@ -76,9 +82,24 @@ void loop ()
 
 /*-------------------------------------------------------------------------*/
 
+// TODO: maybe use the full MIDI library now?
 void ExtMIDI::checkMIDI() 
 {
   static bool toggle3 = false;
+  if(MIDI.read())
+  {
+    switch(MIDI.getType())
+    {
+      case midi::Clock:
+        digitalWrite(53, toggle3);
+        toggle3 = !toggle3;
+        runSequencerTick = true;    
+        break;
+    }
+  }
+
+
+  /* 
   do{
     if (Serial.available()) 
     {
@@ -93,7 +114,7 @@ void ExtMIDI::checkMIDI()
           midiState.midiTicks = 0;
           runSequencerTick = true;
         }
-        /* if (midiState.midiTicks > MIDI_TICKS_PER_BEAT) {
+        if (midiState.midiTicks > MIDI_TICKS_PER_BEAT) {
           midiState.midiTicks = 0;
           int currentMillis = millis();
           // one beat (quarter note) has passed
@@ -108,11 +129,11 @@ void ExtMIDI::checkMIDI()
             }
             midiState.prevMillisPerQuarterNote = currentMillisPerQuarterNote;
           }
-        } */
+        } 
       }
     }
   } while (Serial.available() > 0);//when at least three bytes available
-  
+  */
 }
 
 void ExtMIDI::initMIDIState(void)

@@ -57,6 +57,7 @@ void Sequencer::tick(void)
       state.currentTick = 0;
       break;
   }
+  
 }
 
 void Sequencer::playStep(int step)
