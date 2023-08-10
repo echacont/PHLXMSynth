@@ -51,8 +51,6 @@
 
 // MIDI
 #define MIDI_TICKS_PER_BEAT 24
-#define MIDI_TICKS_PER_SEQ_TICK  MIDI_TICKS_PER_BEAT/TICKS_PER_STEP
-#define MIDI_STATUS_CLOCK   0xF8
 
 // music defines
 #define SCALE_SIZE          7
@@ -130,8 +128,8 @@ typedef struct sequencerState sequencerState_t;
 // External flags
 struct extFlags
 {
-  bool runSequencerTick;
-  bool updateDisplay;
+  volatile bool runSequencerTick;
+  volatile bool updateDisplay;
 };
 typedef struct extFlags extFlags_t;
 

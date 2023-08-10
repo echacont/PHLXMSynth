@@ -30,18 +30,6 @@ class Lcdisp : private LiquidCrystal_I2C
   void Lcdisp::printPointer(int p, int i, int col, int row);
 };
 
-class Leds
-{
-  private:
-  int  pin[NUM_LEDS];
-  public:
-  bool status[NUM_LEDS];
-  // constructor
-  Leds(void);
-  void update(bool leds[]);
-  void update(int led, bool status);
-};
-
 enum PC_opts_e { VPC } ;
 
 #endif // LCDISPLAY_H

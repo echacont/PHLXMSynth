@@ -18,8 +18,6 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   state.root = DEFAULT_ROOT;
   state.chordStep = CHORD_STEP;
   state.numChordNotes = NUM_CHORD_NOTES;
-
-  for (int i=0; i<NUM_LEDS; i++) sqLeds[i] = false;
   
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
@@ -32,9 +30,9 @@ Sequencer::Sequencer(void) : Fluxamasynth()
 
 void Sequencer::tick(void)
 {
-  sqLeds[1] = !sqLeds[1];
-
-  switch (state.trans) 
+  static bool redLed = false;
+  //state.trans = PLAY;
+  switch (state.trans)
   {
     case PLAY:
       playStep(state.currentStep);
@@ -44,17 +42,18 @@ void Sequencer::tick(void)
         state.currentTick = 0;
         state.currentStep++;
         if (state.currentStep == NUM_STEPS0) state.currentStep = 0;
+        redLed = !redLed;
+        digitalWrite(PIN_LED_RED, redLed);
       }
-      sqLeds[0] = true;
+      digitalWrite(PIN_LED_GRN, LOW); // turn on green led (PLAY)
       break;
     case PAUSE:
-      sqLeds[0] = !sqLeds[0];
       state.currentTick = TICKS_PER_STEP-1;
       break;
     case STOP:
-      sqLeds[0] = false;
       state.currentStep = 0;
       state.currentTick = 0;
+      digitalWrite(PIN_LED_GRN, HIGH); // turn off green led
       break;
   }
   

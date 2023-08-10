@@ -51,9 +51,8 @@ class PHLXM
   Controller contrl;  
   // sequencer
   Sequencer sq;
-  // LCD and LEDS
+  // Liquid Crystal Display
   Lcdisp disp;
-  Leds leds;
 
   // constructor
   PHLXM(void);

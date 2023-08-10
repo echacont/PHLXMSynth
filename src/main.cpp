@@ -13,8 +13,8 @@
 #define USE_TIMER_3                   false
 #define USE_TIMER_4                   false
 #define USE_TIMER_5                   false
-#define TIMER1_INTERVAL_MS            10
-#define TIMER2_INTERVAL_MS            251
+#define TIMER1_INTERVAL_MS            7
+#define TIMER2_INTERVAL_MS            54
 
 #include <Arduino.h>
 #include "PHLXM.h"
@@ -37,7 +37,7 @@ void TimerHandler1()
 // display refresh
 void TimerHandler2()
 {
-  //flags.updateDisplay = true;
+  flags.updateDisplay = true;
 }
 
 void setup () 
@@ -61,17 +61,16 @@ void setup ()
   ITimer2.init();
   ITimer2.attachInterruptInterval(TIMER2_INTERVAL_MS, TimerHandler2, 0);
 
-  phlxm->run(flags);
+  //phlxm->run(flags);
 }
 
 void loop () 
 {
-  //phlxm->run(flags);
+  phlxm->run(flags);
+
+  // chear flags (should have been consumed inside phlxm->run())
   flags.updateDisplay = false;
-  if (flags.runSequencerTick) {
-    //phlxm->sq.tick();
-    flags.runSequencerTick = false;
-  }
+  flags.runSequencerTick = false;
 };
 
 /*-------------------------------------------------------------------------*/
@@ -79,80 +78,36 @@ void loop ()
 void checkMIDI(void) 
 {
   static bool toggle3 = false;
+
+  noInterrupts();
   if(MIDI.read())
   {
     switch(MIDI.getType())
     {
       case midi::Clock:
-        digitalWrite(53, toggle3);
+        // instrumentation external signal GPIO 53
         toggle3 = !toggle3;
+        digitalWrite(53, toggle3);
+
+        phlxm->sq.tick();
         flags.runSequencerTick = true;    
         break;
+
+      case midi::Start:
+        phlxm->contrl.mode.trans = PLAY;
+        break;
+      
+      case midi::Stop:
+        phlxm->contrl.mode.trans = STOP;
+        break;
+
+      case midi::Continue:
+        phlxm->contrl.mode.trans = PLAY;
+        break;      
+
       default:
         break;
     }
   }
+  interrupts();
 }
-
-  /* 
-  do{
-    if (Serial.available()) 
-    {
-      byte commandByte = Serial.read();   //read first byte
-      //byte noteByte = Serial.read();      //read next byte
-      //byte velocityByte = Serial.read();  //read final byte
-      if (commandByte == MIDI_STATUS_CLOCK) {          //if clock message
-        digitalWrite(53, toggle3);
-        toggle3 = !toggle3;
-        midiState.midiTicks++;
-        if (midiState.midiTicks > MIDI_TICKS_PER_SEQ_TICK) {
-          midiState.midiTicks = 0;
-          runSequencerTick = true;
-        }
-        if (midiState.midiTicks > MIDI_TICKS_PER_BEAT) {
-          midiState.midiTicks = 0;
-          int currentMillis = millis();
-          // one beat (quarter note) has passed
-          int currentMillisPerQuarterNote = 
-              (currentMillis - midiState.prevMillisPerQuarterNote);
-          // sequencer ticks are use different time scale (slower) 
-          // because of CPU performance
-          if (currentMillisPerQuarterNote > 0) {
-            if (currentMillisPerQuarterNote != midiState.prevMillisPerQuarterNote) {
-              //midiState.changeMillisPerTick = true;
-              midiState.millisPerTick = currentMillisPerQuarterNote>>2; // divided by 4 (TICKS_PER_BEAT)
-            }
-            midiState.prevMillisPerQuarterNote = currentMillisPerQuarterNote;
-          }
-        } 
-      }
-    }
-  } while (Serial.available() > 0);//when at least three bytes available
-  
-}
-
-
-void ExtMIDI::initMIDIState(void)
-{
-  midiState.midiTicks = 0;
-  midiState.millisPerTick = 0;
-  midiState.prevMillisPerQuarterNote = 0;
-  midiState.changeMillisPerTick = false;
-  midiState.updateDisplay = false;
-}
-
-void ExtMIDI::handleSync(void)
-{
-  midiState.millisPerTick++;
-}
-
-void ExtMIDI::handleStart(void) 
-{
-  midiState.millisPerTick++;
-}
-
-void ExtMIDI::handleNoteOn(unsigned int channel, unsigned int note, unsigned int velocity)
-{
-  midiState.millisPerTick++;
-}
-*/

@@ -25,8 +25,6 @@ class Sequencer : private Fluxamasynth
 
   sequencerState_t state; 
 
-  bool sqLeds[NUM_LEDS];
-
   Sequencer(void);
   void tick(void);
   void initSequence(void);

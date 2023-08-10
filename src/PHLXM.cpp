@@ -14,9 +14,12 @@ void PHLXM::run(extFlags_t flags)
   // apply changes to models and come around again (and again and again....)
   sq.progChange(contrl.program);   // apply program change
   sq.updateSequencer(contrl.mode);// apply user sequence
-  
-  if (flags.updateDisplay) {
-    leds.update(sq.sqLeds);         // leds driven by sequencer
+
+  // TODO: these flags could be checked inside of tick and updates
+  //if (flags.runSequencerTick)
+  //  sq.tick();
+  //if (flags.updateDisplay) 
+  {
     disp.update(contrl.program,     // LCD has a lot of stuff to show
                 contrl.mode,
                 sq.state);        
@@ -50,7 +53,7 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = GEN;
+  mode.menu = SEQ;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.option = 0;
@@ -132,9 +135,6 @@ void Controller::updateMode()
   program.update = false;
   mode.allNotesOff = false;
   mode.updateSeq = false;
-  // tempoChange is cleared when it is consumed by timer interrupt
-  // routine  tick() (main.cpp)
-  // mode.tempoChange = false;
 
   // state machine kinda
   switch (mode.menu)

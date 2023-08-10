@@ -135,24 +135,3 @@ void Lcdisp::printPointer(int p, int i, int col, int row)
 }
 
 /*--------------------------------------------------*/
-
-Leds::Leds(void)
-{
-  pin[0] = PIN_LED_GRN;
-  pin[1] = PIN_LED_RED;
-  for (int i = 0; i<NUM_LEDS; i++) {
-    status[i] = false;
-    pinMode(pin[i], OUTPUT);
-    digitalWrite(pin[i], HIGH);
-  }
-}
-
-
-void Leds::update(bool leds[NUM_LEDS])
-{
-  for (int i = 0; i<NUM_LEDS; i++) {
-    status[i] = leds[i];  // this is needed to keep status updated :)
-    if(status[i]) digitalWrite(pin[i], LOW);
-    else digitalWrite(pin[i], HIGH);
-  }
-}
