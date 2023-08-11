@@ -56,9 +56,19 @@
 // music defines
 #define SCALE_SIZE          7
 
+// reverb
+#define CHORUS_LEVEL        0
+#define CHORUS_TYPE         1
+#define CHORUS_DELAY        2
+#define CHORUS_FDBK         3
+#define CHORUS_RATE         4
+#define CHORUS_DEPTH        5
+
 // enumerated types
 enum mode_e { PC, GEN, MIX, SEQ, HARM_MODE, SEQ_MODE, CHORUS, REVERB, last };
 enum transport_e { STOP, PLAY, PAUSE };
+//enum reverb_parameter_e { VOL, PROG, DELAY, FEEDB, RATE, DEPTH, last };
+
 
 struct controllerStatus {
   bool potChanged[NUM_POTS];        // indicates if there was change
@@ -80,8 +90,10 @@ struct controllerMode {
   // user interface
   bool menuChanged;
   int pointer;
+  int value;
   int option;
-  int counter;
+  int fxParam;
+  int fxValue;
   int numChordNotes;
   int spread;     // unison detune using midi note bend
   int panspread;
@@ -105,7 +117,10 @@ struct Program_s
   // FX
   int chorusType[NUM_UNISON_VOICES];
   int chorusLevel[NUM_UNISON_VOICES];
+  int chorusDelay[NUM_UNISON_VOICES];
   int chorusFdbk[NUM_UNISON_VOICES];
+  int chorusRate[NUM_UNISON_VOICES];
+  int chorusDepth[NUM_UNISON_VOICES];
   int reverbType[NUM_UNISON_VOICES];
   int reverbLevel[NUM_UNISON_VOICES];
   int reverbFdbk[NUM_UNISON_VOICES];

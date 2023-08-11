@@ -53,16 +53,20 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = MIX;
+  mode.menu = CHORUS;
   mode.trans = STOP;
   mode.pointer = 0;
+  mode.value = 0;
   mode.option = 0;
-  mode.counter = 0;
+  mode.fxParam = 0;
+  mode.fxValue = 0;
   mode.root = DEFAULT_ROOT;
   mode.chordStep = CHORD_STEP;
   mode.numChordNotes = NUM_CHORD_NOTES;
+  ///////////////////////////////////////////////////////
   mode.tempo = BASE_TEMPO;
   mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
+  ///////////////////////////////////////////////////////
   for (int i=0; i<NUM_STEPS0; i++)
     mode.pSeq[i] = 1;
   mode.spread = UNISON_PITCH_SPREAD;
@@ -78,6 +82,16 @@ Controller::Controller(void)
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
     program.voiceProgram[i] = INITIAL_PROGRAM;
     program.voiceVol[i] = INITIAL_VOICE_VOL;
+    // voice FX
+    program.chorusType[i]  = 0;
+    program.chorusLevel[i] = 0;
+    program.chorusDelay[i] = 0;
+    program.chorusFdbk[i]  = 0;
+    program.chorusRate[i]  = 0;
+    program.chorusDepth[i] = 0;
+    program.reverbType[i]  = 0;
+    program.reverbLevel[i] = 0;
+    program.reverbFdbk[i]  = 0;
   }
   program.bank = 0;
   program.masterVol = INITIAL_MASTER_VOL;
@@ -260,11 +274,35 @@ void Controller::updateMode(extFlags_t flags)
       program.update = true;
     }
     break;
-/*
+
   case CHORUS:
-
+    // This menu is different: one pointer selects voice, a second one
+    // selects the parameter and the third/fourth selects the value
+    if (status.potChanged[POT_0] == true) {
+      mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB (4 options)
+    }
+    if (status.potChanged[POT_1] == true) {
+      mode.value = status.potValue[POT_1];
+    }
+    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
+      // choose between the 4 voices
+      if (mode.pointer == 0) { mode.option = mode.value>>5; }
+      // choose between 8 parameters (not all are used)
+      else if (mode.pointer == 1) { mode.fxParam = mode.value>>4; } 
+      // choose value: range depends on what parameter was chosen (fxParam)
+      else 
+      {
+        if      (mode.fxParam == CHORUS_LEVEL) { program.chorusLevel[mode.option] = mode.value<<1; }
+        else if (mode.fxParam == CHORUS_TYPE)  { program.chorusType[mode.option]  = mode.value>>4; }
+        else if (mode.fxParam == CHORUS_DELAY) { program.chorusType[mode.option]  = mode.value>>4; } // check range
+        else if (mode.fxParam == CHORUS_FDBK)  { program.chorusFdbk[mode.option]  = mode.value>>4; } // check range
+        else if (mode.fxParam == CHORUS_RATE)  { program.chorusRate[mode.option]  = mode.value>>4; } // check range    
+        else if (mode.fxParam == CHORUS_DEPTH) { program.chorusDepth[mode.option] = mode.value>>4; } // check range  
+      }
+      program.update = true;
+    }
     break;
-
+/*
   case REVERB:
 
     break;
@@ -272,7 +310,7 @@ void Controller::updateMode(extFlags_t flags)
   default:
     break;
   
-  }
+  } // switch(mode.menu)
 
   // scroll the menu
   if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0]) {
