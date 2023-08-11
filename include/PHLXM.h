@@ -10,19 +10,6 @@
 #include "sequencer.h"
 #include "lcdisplay.h"
 
-/*
-class ExtMIDI {
-  public:
-  extMIDIState_t midiState;
-  
-
-  void initMIDIState(void);
-  //ExtMIDI(HardwareSerial &s) { initMIDIState(); }
-  void checkMIDI(void);
-  ExtMIDI(void)  { initMIDIState(); }
-};
-*/
-
 // controller
 class Controller
 {
@@ -38,7 +25,7 @@ class Controller
   // constructor
   Controller(void);
   void updateStatus(void);        // see what input is being applied
-  void updateMode(void);   // with the input, what is being controlled?
+  void updateMode(extFlags_t);   // with the input, what is being controlled?
   int getMillisPerTick(void);
 };
 
@@ -48,7 +35,7 @@ class PHLXM
   private:
   public:
   // controller
-  Controller contrl;  
+  Controller contrl;
   // sequencer
   Sequencer sq;
   // Liquid Crystal Display

@@ -13,7 +13,7 @@ void PHLXM::run(extFlags_t flags)
   // update synth program and sequencer state. Then get controller data, 
   // apply changes to models and come around again (and again and again....)
   sq.progChange(contrl.program);   // apply program change
-  sq.updateSequencer(contrl.mode);// apply user sequence
+  sq.updateSequencer(contrl.mode, flags);// apply user sequence
 
   // TODO: these flags could be checked inside of tick and updates
   //if (flags.runSequencerTick)
@@ -26,7 +26,7 @@ void PHLXM::run(extFlags_t flags)
   }
 
   contrl.updateStatus();   // reads controller into status (user input)
-  contrl.updateMode();    // what needs to be done? Do it.
+  contrl.updateMode(flags);    // what needs to be done? Do it.
 }
 
 /*--------------------------------------------------*/
@@ -71,6 +71,8 @@ Controller::Controller(void)
   mode.updateSeq = true;
   mode.tempoChange = true;
   mode.allNotesOff = false;
+  // MIDI divisor
+  mode.divisor = 24;
 
   // initialize a program
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
@@ -124,7 +126,7 @@ void Controller::updateStatus(void)
   }
 }
 
-void Controller::updateMode()
+void Controller::updateMode(extFlags_t flags)
 {
   // clear flags and reset pointer and option artifacts
   if (mode.menuChanged) {
@@ -210,8 +212,10 @@ void Controller::updateMode()
       mode.pointer = status.potValue[POT_0]>>5; 
     } 
     if (status.potChanged[POT_1] == true) {
-      if ((mode.pointer == 0) || (mode.pointer == 3)) // Volume or BPM
+      if ((mode.pointer == 0)) // Volume 
         mode.option = status.potValue[POT_1];
+      else if ((mode.pointer == 3)) // Divisor
+        mode.option = (status.potValue[POT_1]>>2)+1;   // from 1 up to 32
       else // Detune (spread) or Pan spread
         // get 8 options
         mode.option = status.potValue[POT_1]>>4;
@@ -233,9 +237,11 @@ void Controller::updateMode()
           program.update = true;
           break;
         case 3: 
-          mode.tempo = mode.option + BASE_TEMPO;
-          mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
-          mode.tempoChange = true;
+          mode.divisor = mode.option;
+          mode.updateSeq = true;
+          //mode.tempo = mode.option + BASE_TEMPO;
+          //mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
+          //mode.tempoChange = true;
           break;
       }
     }
@@ -256,6 +262,7 @@ void Controller::updateMode()
 
   // transport machine
   // transport machine uses button 2 for (PASE/STOP) and (PLAY)
+  /*
   if(status.buttonChanged[BUTTON_2]) //} && status.buttonValue[BUTTON_0])
   {
     switch (mode.trans)
@@ -274,7 +281,7 @@ void Controller::updateMode()
         break;
     }
   }
-
+  */
 
 }
 

@@ -48,7 +48,7 @@ void setup ()
 
   // Initialize External MIDI
   //Serial.begin(31250);
-  MIDI.begin(MIDI_CHANNEL_OMNI);
+  MIDI.begin(MIDI_CHANNEL);
   MIDI.turnThruOff();
 
   // Initialize Timer1 and attach ISR. This will be used to keep track
@@ -61,21 +61,20 @@ void setup ()
   ITimer2.init();
   ITimer2.attachInterruptInterval(TIMER2_INTERVAL_MS, TimerHandler2, 0);
 
-  //phlxm->run(flags);
+  pinMode(PIN_LED_GRN, OUTPUT);
+  pinMode(PIN_LED_RED, OUTPUT);
+  digitalWrite(PIN_LED_GRN, HIGH);
+  digitalWrite(PIN_LED_RED, HIGH);
 }
 
 void loop () 
 {
   phlxm->run(flags);
-
-  // chear flags (should have been consumed inside phlxm->run())
-  flags.updateDisplay = false;
-  flags.runSequencerTick = false;
 };
 
 /*-------------------------------------------------------------------------*/
 
-void checkMIDI(void) 
+void checkMIDI(void)
 {
   static bool toggle3 = false;
 
@@ -86,9 +85,7 @@ void checkMIDI(void)
     {
       case midi::Clock:
         // instrumentation external signal GPIO 53
-        toggle3 = !toggle3;
-        digitalWrite(53, toggle3);
-
+        toggle3 = !toggle3; digitalWrite(53, toggle3);
         phlxm->sq.tick();
         flags.runSequencerTick = true;    
         break;
@@ -104,6 +101,15 @@ void checkMIDI(void)
       case midi::Continue:
         phlxm->contrl.mode.trans = PLAY;
         break;      
+
+      case midi::NoteOn:
+        phlxm->contrl.mode.root = MIDI.getData1();
+        //MIDI.getData2();  // velocity
+        flags.updateSequence = true;
+        break;
+      
+      case midi::NoteOff:
+        break;
 
       default:
         break;

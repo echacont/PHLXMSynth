@@ -18,6 +18,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   state.root = DEFAULT_ROOT;
   state.chordStep = CHORD_STEP;
   state.numChordNotes = NUM_CHORD_NOTES;
+  state.divisor = MIDI_TICKS_PER_BEAT;
   
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
@@ -30,33 +31,26 @@ Sequencer::Sequencer(void) : Fluxamasynth()
 
 void Sequencer::tick(void)
 {
-  static bool redLed = false;
-  //state.trans = PLAY;
   switch (state.trans)
   {
     case PLAY:
       playStep(state.currentStep);
       state.currentTick++;
-      if (state.currentTick == TICKS_PER_STEP) 
+      if (state.currentTick == state.divisor) 
       {
         state.currentTick = 0;
         state.currentStep++;
         if (state.currentStep == NUM_STEPS0) state.currentStep = 0;
-        redLed = !redLed;
-        digitalWrite(PIN_LED_RED, redLed);
       }
-      digitalWrite(PIN_LED_GRN, LOW); // turn on green led (PLAY)
       break;
     case PAUSE:
-      state.currentTick = TICKS_PER_STEP-1;
+      state.currentTick = state.divisor-1;
       break;
     case STOP:
       state.currentStep = 0;
       state.currentTick = 0;
-      digitalWrite(PIN_LED_GRN, HIGH); // turn off green led
       break;
   }
-  
 }
 
 void Sequencer::playStep(int step)
@@ -65,7 +59,7 @@ void Sequencer::playStep(int step)
   {
     if (state.currentTick == 0) 
       playChord(seq[step], state.numChordNotes, true);
-    if (state.currentTick == TICKS_PER_STEP-1)
+    if (state.currentTick == state.divisor-1)
       playChord(seq[step], state.numChordNotes, false);
   }
 }
@@ -87,13 +81,15 @@ void Sequencer::playChord(int pitch, int numNotes, bool gate)
     }
 }
 
-void Sequencer::updateSequencer(controllerMode_t mode)
+void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
 {
-  if (mode.updateSeq) {
+  if (mode.updateSeq || flags.updateSequence) {
+    flags.updateSequence = false;
     state.root = mode.root;
     state.chordStep = mode.chordStep;
     state.numChordNotes = mode.numChordNotes;
     state.spread = mode.spread;
+    state.divisor = mode.divisor;
     for (int i=0; i<NUM_STEPS0; i++)
       // pSeq is scale degree based so 1 is root
       // Also, if 0 is found then it is preserved (silence)
@@ -108,7 +104,22 @@ void Sequencer::updateSequencer(controllerMode_t mode)
   // transport
   state.trans = mode.trans;
   // tempo bpm
-  if (mode.tempoChange) state.tempo = mode.tempo;
+  //if (mode.tempoChange) state.tempo = mode.tempo;
+  switch(state.trans)
+  {
+    case PLAY:
+      digitalWrite(PIN_LED_GRN, LOW); // turn on green led (PLAY)
+      digitalWrite(PIN_LED_RED, (state.currentStep%2));
+      break;
+    case STOP:
+      digitalWrite(PIN_LED_GRN, HIGH); // turn off green led (STOP)
+      digitalWrite(PIN_LED_RED, HIGH);
+      break;
+    default:
+      digitalWrite(PIN_LED_GRN, HIGH); // turn off led
+      break;
+  }
+
 
 }
 

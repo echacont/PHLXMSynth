@@ -37,8 +37,7 @@
   // SEQUENCER
 #define NUM_STEPS0          8
 #define MAX_NOTES           64
-#define TICKS_PER_STEP      24 
-#define TICKS_PER_BEAT      24  // used for millisPerTick calculations
+#define TICKS_PER_BEAT      24  // not being used
 #define BASE_TEMPO          60
 #define DEFAULT_ROOT        52  // E
 #define NUM_UNISON_VOICES   4
@@ -50,7 +49,8 @@
 #define INITIAL_MASTER_VOL  72
 
 // MIDI
-#define MIDI_TICKS_PER_BEAT 24
+#define MIDI_TICKS_PER_BEAT 24    // this is the default sequencer divisor
+#define MIDI_CHANNEL        15
 
 // music defines
 #define SCALE_SIZE          7
@@ -70,9 +70,12 @@ typedef struct controllerStatus controllerStatus_t;
 struct controllerMode {
   mode_e menu;
   transport_e trans;
+  // these ones might be doomed
   int tempo;
   int millisPerTick;
   bool tempoChange;
+  // Ext MIDI tick divisor
+  int divisor;
   // user interface
   bool menuChanged;
   int pointer;
@@ -122,6 +125,7 @@ struct sequencerState {
   int millisPerTick;
   int currentTick;
   int currentStep;
+  int divisor;
 };
 typedef struct sequencerState sequencerState_t;
 
@@ -130,6 +134,7 @@ struct extFlags
 {
   volatile bool runSequencerTick;
   volatile bool updateDisplay;
+  volatile bool updateSequence;
 };
 typedef struct extFlags extFlags_t;
 
