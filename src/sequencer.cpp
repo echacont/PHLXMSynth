@@ -22,7 +22,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
-    setChannelVolume(i, 32);  
+    setChannelVolume(i, INITIAL_VOICE_VOL);  
     //pan(i,127-((i-state.voices/2)*state.panspread));
     setChorus(i, 6, 32, 80, 8 );
     setReverb(i, 7, 72, 72);
@@ -130,6 +130,7 @@ void Sequencer::progChange(synthProgram_t program)
     for (int i=0; i<NUM_UNISON_VOICES; i++) {
       programChange(program.bank, i, program.voiceProgram[i]);
       pan(i,127-((i-NUM_UNISON_VOICES/2)*program.panspread));
+      setChannelVolume(i, program.voiceVol[i]);
     }
     setMasterVolume(program.masterVol);
   }

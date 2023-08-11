@@ -43,10 +43,11 @@
 #define NUM_UNISON_VOICES   4
 #define NUM_CHORD_NOTES     3
 #define CHORD_STEP          2
-#define UNISON_PITCH_SPREAD 320
+#define UNISON_PITCH_SPREAD 128
 #define UNISON_PAN_SPREAD   32
 #define INITIAL_PROGRAM     32
-#define INITIAL_MASTER_VOL  72
+#define INITIAL_MASTER_VOL  64
+#define INITIAL_VOICE_VOL   64
 
 // MIDI
 #define MIDI_TICKS_PER_BEAT 24    // this is the default sequencer divisor

@@ -53,7 +53,7 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = SEQ;
+  mode.menu = MIX;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.option = 0;
@@ -77,6 +77,7 @@ Controller::Controller(void)
   // initialize a program
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
     program.voiceProgram[i] = INITIAL_PROGRAM;
+    program.voiceVol[i] = INITIAL_VOICE_VOL;
   }
   program.bank = 0;
   program.masterVol = INITIAL_MASTER_VOL;
@@ -247,6 +248,27 @@ void Controller::updateMode(extFlags_t flags)
     }
     break;
 
+  case MIX:
+    if (status.potChanged[POT_0] == true) {
+      mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB (4 voices)
+    }
+    if (status.potChanged[POT_1] == true) {
+      mode.option = status.potValue[POT_1]; // 7 bits
+    }
+    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
+      program.voiceVol[mode.pointer] = mode.option;
+      program.update = true;
+    }
+    break;
+/*
+  case CHORUS:
+
+    break;
+
+  case REVERB:
+
+    break;
+*/
   default:
     break;
   

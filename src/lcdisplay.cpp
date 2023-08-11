@@ -109,7 +109,20 @@ void Lcdisp::update(synthProgram_t program,
       break;
 
     case MIX:
-      print("Mixer");
+      print("Mix");
+      setCursor(5,0);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        write(LCD_0_SYMBOL+i+1);
+        printPointer(mode.pointer, i, 6+i*3, 0);
+        write(LCD_SPACE_SYMBOL);
+      }
+      setCursor(2,1);
+      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
+      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        setCursor(5+i*3,1);
+        print(program.voiceVol[i], HEX); write(LCD_SPACE_SYMBOL);
+      }
       break;
 
     case CHORUS:
