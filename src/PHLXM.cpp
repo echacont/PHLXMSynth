@@ -53,7 +53,7 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = CHORUS;
+  mode.menu = REVERB;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.value = 0;
@@ -303,11 +303,33 @@ void Controller::updateMode(extFlags_t flags)
       
     }
     break;
-/*
-  case REVERB:
 
+  case REVERB:
+    // This menu is different: one pointer selects voice, a second one
+    // selects the parameter and the third/fourth selects the value
+    if (status.potChanged[POT_0] == true) {
+      mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB (4 options)
+    }
+    if (status.potChanged[POT_1] == true) {
+      mode.value = status.potValue[POT_1];
+    }
+    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
+      // choose between the 4 voices
+      if (mode.pointer == 0) { mode.option = mode.value>>5; }
+      // choose between 3 parameters (not all are used)
+      else if (mode.pointer == 1) { mode.fxParam = mode.value>>5; } 
+      // choose value: range depends on what parameter was chosen (fxParam)
+      else 
+      {
+        if      (mode.fxParam == REVERB_LEVEL) { program.reverbLevel[mode.option] = mode.value; }
+        else if (mode.fxParam == REVERB_TYPE)  { program.reverbType[mode.option]  = mode.value>>4; }
+        else if (mode.fxParam == REVERB_FDBK)  { program.reverbFdbk[mode.option]  = mode.value; } 
+        program.update = true; // only update program when new value is entered
+      }
+      
+    }
     break;
-*/
+
   default:
     break;
   

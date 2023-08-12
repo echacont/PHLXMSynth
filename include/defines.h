@@ -56,13 +56,18 @@
 // music defines
 #define SCALE_SIZE          7
 
-// reverb
+// chorus
 #define CHORUS_LEVEL        0
 #define CHORUS_TYPE         1
 #define CHORUS_DELAY        2
 #define CHORUS_FDBK         3
 #define CHORUS_RATE         4
 #define CHORUS_DEPTH        5
+
+// reverb
+#define REVERB_LEVEL        0
+#define REVERB_TYPE         1
+#define REVERB_FDBK         3
 
 // enumerated types
 enum mode_e { PC, GEN, MIX, SEQ, HARM_MODE, SEQ_MODE, CHORUS, REVERB, last };

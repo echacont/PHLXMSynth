@@ -135,7 +135,11 @@ void Sequencer::progChange(synthProgram_t program)
       // channel, program, level, feedback, chorusDelay
       //setChorus(i, program.chorusType[i], program.chorusLevel[i]<<1, program.chorusFdbk[i], program.chorusDelay[i] );
       // using same chorus program for all voices
-      setChorus(i, program.chorusType[0], program.chorusLevel[0]<<1, program.chorusFdbk[0], program.chorusDelay[0] );
+      setChorus(i, program.chorusType[0], program.chorusLevel[0]<<1, program.chorusFdbk[0]<<1, program.chorusDelay[0]<<1 );
+      // reverb
+      // channel, program, level, delayFeedback 
+      setReverb(i, program.reverbType[0], program.reverbLevel[0]<<1, program.reverbFdbk[0]<<1);
+      //setReverb(channel, program, level, delayFeedback)
     }
     setMasterVolume(program.masterVol);
   }

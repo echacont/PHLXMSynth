@@ -162,7 +162,7 @@ void Lcdisp::update(synthProgram_t program,
       } else if (mode.pointer == 1) { // parameter being chosen, display nothing here
         write(LCD_SPACE_SYMBOL);write(LCD_SPACE_SYMBOL);write(LCD_SPACE_SYMBOL);
       } else { // parameter value selection. Range depends on what parameter
-        if      (mode.fxParam == CHORUS_LEVEL ) { print(mode.value<<1, HEX);    }
+        if      (mode.fxParam == CHORUS_LEVEL ) { print(mode.value, HEX);    }
         else if (mode.fxParam == CHORUS_TYPE  ) { print(mode.value>>4, HEX);    }
         else if (mode.fxParam == CHORUS_DELAY ) { print(mode.value>>4, HEX);    }
         else if (mode.fxParam == CHORUS_FDBK  ) { print(mode.value>>4, HEX);    }
@@ -180,7 +180,7 @@ void Lcdisp::update(synthProgram_t program,
       else write(LCD_SPACE_SYMBOL);
       setCursor(8,1); 
       if (mode.pointer == 1) { // two behaviors: if selecting parameter, show current value
-        if      (mode.value>>4 == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option]<<1, HEX);    }
+        if      (mode.value>>4 == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option], HEX);    }
         else if (mode.value>>4 == CHORUS_TYPE  ) { print(program.chorusType[mode.option], HEX); } // chorus type
         else if (mode.value>>4 == CHORUS_DELAY ) { print(program.chorusDelay[mode.option], HEX);    }
         else if (mode.value>>4 == CHORUS_FDBK  ) { print(program.chorusFdbk[mode.option], HEX); }
@@ -188,7 +188,7 @@ void Lcdisp::update(synthProgram_t program,
         else if (mode.value>>4 == CHORUS_DEPTH ) { print(program.chorusDepth[mode.option], HEX);    }
         else {                                     print("--"); }
       } else {  // else, show value corresponding to selected parameter (fxParam)
-        if      (mode.fxParam == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option]<<1, HEX);    }
+        if      (mode.fxParam == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option], HEX);    }
         else if (mode.fxParam == CHORUS_TYPE  ) { print(program.chorusType[mode.option], HEX); } // chorus type
         else if (mode.fxParam == CHORUS_DELAY ) { print(program.chorusDelay[mode.option], HEX);    }
         else if (mode.fxParam == CHORUS_FDBK  ) { print(program.chorusFdbk[mode.option], HEX); }
@@ -200,8 +200,63 @@ void Lcdisp::update(synthProgram_t program,
       break; // case CHORUS
 
     case REVERB:
-      print("Reverb");
-      break;
+      print("Rvb");
+      setCursor(4,0);
+      print("Vo");
+      printPointer(mode.pointer, 1, 7, 0);
+      setCursor(8,0); // two behaviors: if this is selected, scroll through options using pot value
+      if (mode.pointer == 1) {
+        if      (mode.value>>5 == REVERB_LEVEL ) { print("Level  ");    }
+        else if (mode.value>>5 == REVERB_TYPE  ) { print("Type   ");     }
+        else if (mode.value>>5 == REVERB_FDBK  ) { print("Fdbak  "); }
+        else {                                     print("----   "); }
+        if (mode.value>>4 == mode.fxParam) write(LCD_LEFT_SYMBOL);
+        else write(LCD_SPACE_SYMBOL); 
+      } else { // else show current parameter (program.fxParam)
+        if      (mode.fxParam == REVERB_LEVEL ) { print("Level  ");    }
+        else if (mode.fxParam == REVERB_TYPE  ) { print("Type   ");     }
+        else if (mode.fxParam == REVERB_FDBK  ) { print("Fdbck  "); }
+        else {                                    print("----   "); }
+        write(LCD_LEFT_SYMBOL);
+      }
+      setCursor(1,1);
+      //if (mode.value<0x10)  write(LCD_SPACE_SYMBOL);      // Make this into a function
+      //print(mode.value, HEX); write(LCD_RIGHT_SYMBOL);
+      if (mode.pointer == 0) { // voice selection
+        write(LCD_SPACE_SYMBOL);
+        print((mode.value>>5)+1); // voice 1, 2, 3 or 4
+        setCursor(3,1); write(LCD_RIGHT_SYMBOL);
+      } else if (mode.pointer == 1) { // parameter being chosen, display nothing here
+        write(LCD_SPACE_SYMBOL);write(LCD_SPACE_SYMBOL);write(LCD_SPACE_SYMBOL);
+      } else { // parameter value selection. Range depends on what parameter
+        if      (mode.fxParam == REVERB_LEVEL ) { print(mode.value, HEX);    }
+        else if (mode.fxParam == REVERB_TYPE  ) { print(mode.value>>4, HEX);    }
+        else if (mode.fxParam == REVERB_FDBK  ) { print(mode.value, HEX);    }
+        else {                                    print("--"); }; 
+        setCursor(3,1); write(LCD_RIGHT_SYMBOL);
+      }
+      // selected voice number (mode.option)
+      printPointer(mode.pointer, 0, 4, 1);
+      print(mode.option+1); // select voice 1, 2, 3 or 4
+      // print current parameter value (programmed)
+      setCursor(7,1);
+      if (mode.pointer > 1) write(LCD_STAR_SYMBOL);
+      else write(LCD_SPACE_SYMBOL);
+      setCursor(8,1); 
+      if (mode.pointer == 1) { // two behaviors: if selecting parameter, show current value
+        if      (mode.value>>5 == REVERB_LEVEL ) { print(program.reverbLevel[mode.option], HEX);    }
+        else if (mode.value>>5 == REVERB_TYPE  ) { print(program.reverbType[mode.option], HEX); } // reverb type
+        else if (mode.value>>5 == REVERB_FDBK  ) { print(program.reverbFdbk[mode.option], HEX); }
+        else {                                     print("--"); }
+      } else {  // else, show value corresponding to selected parameter (fxParam)
+        if      (mode.fxParam == REVERB_LEVEL ) { print(program.reverbLevel[mode.option], HEX);    }
+        else if (mode.fxParam == REVERB_TYPE  ) { print(program.reverbType[mode.option], HEX); } // reverb type
+        else if (mode.fxParam == REVERB_FDBK  ) { print(program.reverbFdbk[mode.option], HEX); }
+        else {                                    print("--"); } 
+      }
+      write(LCD_SPACE_SYMBOL);
+
+      break; // case: REVERB
 
     default:
       print("Rabit hole");
