@@ -24,8 +24,8 @@ Sequencer::Sequencer(void) : Fluxamasynth()
     allNotesOff(i); 
     setChannelVolume(i, INITIAL_VOICE_VOL);  
     //pan(i,127-((i-state.voices/2)*state.panspread));
-    setChorus(i, 6, 32, 80, 8 );
-    setReverb(i, 7, 72, 72);
+    setChorus(i, 0, 0, 0, 0 );
+    setReverb(i, 0, 0, 0);
   }
 }
 
@@ -131,6 +131,11 @@ void Sequencer::progChange(synthProgram_t program)
       programChange(program.bank, i, program.voiceProgram[i]);
       pan(i,127-((i-NUM_UNISON_VOICES/2)*program.panspread));
       setChannelVolume(i, program.voiceVol[i]);
+      // chorus
+      // channel, program, level, feedback, chorusDelay
+      //setChorus(i, program.chorusType[i], program.chorusLevel[i]<<1, program.chorusFdbk[i], program.chorusDelay[i] );
+      // using same chorus program for all voices
+      setChorus(i, program.chorusType[0], program.chorusLevel[0]<<1, program.chorusFdbk[0], program.chorusDelay[0] );
     }
     setMasterVolume(program.masterVol);
   }

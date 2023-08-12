@@ -180,7 +180,7 @@ void Lcdisp::update(synthProgram_t program,
       else write(LCD_SPACE_SYMBOL);
       setCursor(8,1); 
       if (mode.pointer == 1) { // two behaviors: if selecting parameter, show current value
-        if      (mode.value>>4 == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option], HEX);    }
+        if      (mode.value>>4 == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option]<<1, HEX);    }
         else if (mode.value>>4 == CHORUS_TYPE  ) { print(program.chorusType[mode.option], HEX); } // chorus type
         else if (mode.value>>4 == CHORUS_DELAY ) { print(program.chorusDelay[mode.option], HEX);    }
         else if (mode.value>>4 == CHORUS_FDBK  ) { print(program.chorusFdbk[mode.option], HEX); }
@@ -188,7 +188,7 @@ void Lcdisp::update(synthProgram_t program,
         else if (mode.value>>4 == CHORUS_DEPTH ) { print(program.chorusDepth[mode.option], HEX);    }
         else {                                     print("--"); }
       } else {  // else, show value corresponding to selected parameter (fxParam)
-        if      (mode.fxParam == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option], HEX);    }
+        if      (mode.fxParam == CHORUS_LEVEL ) { print(program.chorusLevel[mode.option]<<1, HEX);    }
         else if (mode.fxParam == CHORUS_TYPE  ) { print(program.chorusType[mode.option], HEX); } // chorus type
         else if (mode.fxParam == CHORUS_DELAY ) { print(program.chorusDelay[mode.option], HEX);    }
         else if (mode.fxParam == CHORUS_FDBK  ) { print(program.chorusFdbk[mode.option], HEX); }

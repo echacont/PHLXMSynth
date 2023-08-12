@@ -93,7 +93,7 @@ Controller::Controller(void)
     program.reverbLevel[i] = 0;
     program.reverbFdbk[i]  = 0;
   }
-  program.bank = 0;
+  program.bank = 127; // use the MT-32 sound bank
   program.masterVol = INITIAL_MASTER_VOL;
   program.panspread = UNISON_PAN_SPREAD; 
   program.update = true;
@@ -271,7 +271,7 @@ void Controller::updateMode(extFlags_t flags)
     }
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
       program.voiceVol[mode.pointer] = mode.option;
-      program.update = true;
+      program.update = true; 
     }
     break;
 
@@ -292,14 +292,15 @@ void Controller::updateMode(extFlags_t flags)
       // choose value: range depends on what parameter was chosen (fxParam)
       else 
       {
-        if      (mode.fxParam == CHORUS_LEVEL) { program.chorusLevel[mode.option] = mode.value<<1; }
+        if      (mode.fxParam == CHORUS_LEVEL) { program.chorusLevel[mode.option] = mode.value; }
         else if (mode.fxParam == CHORUS_TYPE)  { program.chorusType[mode.option]  = mode.value>>4; }
-        else if (mode.fxParam == CHORUS_DELAY) { program.chorusType[mode.option]  = mode.value>>4; } // check range
-        else if (mode.fxParam == CHORUS_FDBK)  { program.chorusFdbk[mode.option]  = mode.value>>4; } // check range
-        else if (mode.fxParam == CHORUS_RATE)  { program.chorusRate[mode.option]  = mode.value>>4; } // check range    
-        else if (mode.fxParam == CHORUS_DEPTH) { program.chorusDepth[mode.option] = mode.value>>4; } // check range  
+        else if (mode.fxParam == CHORUS_DELAY) { program.chorusType[mode.option]  = mode.value; } 
+        else if (mode.fxParam == CHORUS_FDBK)  { program.chorusFdbk[mode.option]  = mode.value; } 
+        else if (mode.fxParam == CHORUS_RATE)  { program.chorusRate[mode.option]  = mode.value; } 
+        else if (mode.fxParam == CHORUS_DEPTH) { program.chorusDepth[mode.option] = mode.value; } 
+        program.update = true; // only update program when new value is entered
       }
-      program.update = true;
+      
     }
     break;
 /*
