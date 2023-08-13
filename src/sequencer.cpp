@@ -19,7 +19,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   state.chordStep = CHORD_STEP;
   state.numChordNotes = NUM_CHORD_NOTES;
   state.divisor = MIDI_TICKS_PER_BEAT;
-  state.mode = ARP1;
+  //state.mode = ARP1;
   
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
@@ -131,6 +131,9 @@ void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
           if (state.mode == ARP1) 
             tseq.programFineStep(state.mode, minor_scaleI, state.numChordNotes, state.chordStep);
         }
+    // ARP mode
+    if (mode.arpMode == CHORD_MODE) state.mode = CHORD;
+    else if (mode.arpMode == ARP1_MODE) state.mode = ARP1;
   }
 
   if (mode.allNotesOff) 
@@ -209,10 +212,6 @@ void fineStepSequence::programFineStep(sq_mode_e mode, int8_t intervals[SCALE_SI
       int tStep = MIDI_TICKS_PER_BEAT/numChordNotes;
       //int tStep = 6;
       int gate = tStep-1;
-
-    //for(int i = 0; i < state.voices; i++) {
-    //  int degree = (j*state.chordStep)%SCALE_SIZE;
-    //  int octaves = (j*state.chordStep-degree)/SCALE_SIZE;
       int8_t n = 0;
       for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
         if ( (j%tStep) == 0 ) {
@@ -233,40 +232,3 @@ void fineStepSequence::programFineStep(sq_mode_e mode, int8_t intervals[SCALE_SI
       break;
   }
 }
-
-/*
-Note::Note(void)
-{
-  pitch = DEFAULT_ROOT;
-  velocity = 100;
-  gate = 1;
-  start = 0;
-}
-Note::setPitch(int p)
-{
-  pitch = p;
-  velocity = 100;
-  gate = 1;
-  start = 0;
-}
-Note::setNote(int p, int v, int g, int s)
-{
-  pitch = p;
-  velocity = v;
-  gate = g;
-  start = s;
-}
-Step::Step()
-{
-  nextStep = 0;
-  enable = false;
-}
-
-Step::setStep(int step, int pitch)
-{
-  if (step < NUM_STEPS0) nextStep = step+1;
-  else nextStep = 0;
-  enable = true;
-  notes[0].setPitch(pitch);
-}
-*/

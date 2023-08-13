@@ -64,6 +64,7 @@ Controller::Controller(void)
   mode.root = DEFAULT_ROOT;
   mode.chordStep = CHORD_STEP;
   mode.numChordNotes = NUM_CHORD_NOTES;
+  mode.arpMode = CHORD_MODE;
   ///////////////////////////////////////////////////////
   mode.tempo = BASE_TEMPO;
   mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
@@ -184,6 +185,21 @@ void Controller::updateMode(extFlags_t flags)
       mode.pSeq[mode.pointer] = mode.option;
       mode.updateSeq = true;
     }
+    break;
+
+  case SEQ_MODE:
+    if (status.potChanged[POT_0] == true)
+      mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB 
+    if (status.potChanged[POT_1] == true) {
+      if (mode.pointer == 0) // ARP mode
+        mode.option = status.potValue[POT_1]>>6;  // two options
+    }
+    if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
+      if (mode.pointer == 0) { // ARP mode 
+        mode.arpMode = mode.option;
+        mode.updateSeq = true;
+      }
+    } 
     break;
 
   case HARM_MODE:
@@ -347,6 +363,7 @@ void Controller::updateMode(extFlags_t flags)
   // transport machine
   // transport machine uses button 2 for (PASE/STOP) and (PLAY)
   /*
+  Commented out because transport is being handled with external MIDI
   if(status.buttonChanged[BUTTON_2]) //} && status.buttonValue[BUTTON_0])
   {
     switch (mode.trans)

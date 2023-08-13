@@ -47,8 +47,4 @@ class PHLXM
   void tick(void);
 };
 
-
-
-
-
 #endif //PHLXM_H

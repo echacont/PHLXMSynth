@@ -84,7 +84,6 @@ void Lcdisp::update(synthProgram_t program,
       if (state.root>99)  print(state.root);
       else if (state.root>9) { write(LCD_SPACE_SYMBOL); print(state.root); }
       else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(state.root);  }
-      //setCursor(6,1); print(state.root);
       printPointer(mode.pointer, 1, 9, 1);
       setCursor(10,1);
       print(state.chordStep);
@@ -111,8 +110,20 @@ void Lcdisp::update(synthProgram_t program,
       break;
 
     case SEQ_MODE:
-      print("Seq Mode");
+      print("SqM");
+      setCursor(4,0);
+      print("Mod");
+      setCursor(0,1);
+      if (mode.option>99)  print(mode.option);
+      else if (mode.option>9) { write(LCD_SPACE_SYMBOL); print(mode.option); }
+      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(mode.option);  }        
+      setCursor(3,1); write(LCD_RIGHT_SYMBOL);
+      printPointer(mode.pointer, 0, 4, 1);
+      setCursor(5,1); 
+      if (state.mode == CHORD) print("ch");
+      else if (state.mode == ARP1) print ("a1");      
       break;
+
 
     case MIX:
       print("Mix");

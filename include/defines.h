@@ -44,6 +44,8 @@
 #define POLYPHONY           4   
 #define NUM_CHORD_NOTES     3
 #define CHORD_STEP          2
+#define CHORD_MODE          0
+#define ARP1_MODE           1
 #define UNISON_PITCH_SPREAD 128
 #define UNISON_PAN_SPREAD   32
 #define INITIAL_PROGRAM     32
@@ -95,21 +97,22 @@ struct controllerMode {
   // Ext MIDI tick divisor
   int divisor;
   // user interface
+  bool updateSeq;
   bool menuChanged;
+  bool allNotesOff;
   int pointer;
   int value;
   int option;
   int fxParam;
   int fxValue;
+  int arpMode;
   int numChordNotes;
+  int chordStep;
   int spread;     // unison detune using midi note bend
   int panspread;
   // "MIDI input"
   int root;     // input note
-  int chordStep;
-  bool allNotesOff;
   // user sequence
-  bool updateSeq;
   int pSeq[NUM_STEPS0];
 }; 
 typedef struct controllerMode controllerMode_t;

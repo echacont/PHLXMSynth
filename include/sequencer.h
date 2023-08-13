@@ -52,25 +52,4 @@ class Sequencer : private Fluxamasynth
   void playAllNotesOff(void);
 };
 
-/*
-struct Note {
-  int pitch;      // MIDI pitch    [0, 127]
-  int velocity;   // MIDI velocity [0, 127]
-  int gate;       // how long this note is? [1, TICKS_PER_STEP]
-  int start;      // when this note starts? [0, TICKS_PER_STEP-1]
-  Note(void);
-  setPitch(int p);
-  setNote(int p, int v, int g, int s);
-}; 
-class Step 
-{
-  int nextStep;
-  bool enable;
-  Note notes[MAX_NOTES];
-  public:
-  Step();
-  setStep(int step, int pitch);
-};
-*/
-
 #endif // PHLXM_SEQUENCER_H
