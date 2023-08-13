@@ -21,7 +21,8 @@ Lcdisp::Lcdisp(void)
 
 void Lcdisp::update(synthProgram_t program, 
                     controllerMode_t mode, 
-                    sequencerState_t state)
+                    sequencerState_t state,
+                    fineStepSequence tseq)
 {
   home();
   if (mode.menuChanged) clear();
@@ -60,7 +61,7 @@ void Lcdisp::update(synthProgram_t program,
       printPointer(mode.pointer, 2, 10, 1);
       print(program.panspread>>4, HEX);
       printPointer(mode.pointer, 3, 13, 1);
-      print(state.divisor); write(LCD_SPACE_SYMBOL);
+      print(state.divisor, HEX); write(LCD_SPACE_SYMBOL);
       break;
 
     case HARM_MODE:
@@ -98,6 +99,10 @@ void Lcdisp::update(synthProgram_t program,
       for (int i=0; i<NUM_STEPS0; i++)
         write(LCD_0_SYMBOL+mode.pSeq[i]);
       setCursor(15,0);write(LCD_0_SYMBOL+state.currentStep+1);
+      setCursor(0,1);
+      print(state.currentTick, HEX);  write(LCD_SPACE_SYMBOL);
+      setCursor(3,1);
+      print(tseq.onSeq[state.currentStep][state.currentTick][0], HEX);  write(LCD_SPACE_SYMBOL);
       setCursor(6,1);
       for (int i=0; i<NUM_STEPS0; i++) 
         printPointer(mode.pointer, i, 6+i,1);

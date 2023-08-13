@@ -22,7 +22,8 @@ void PHLXM::run(extFlags_t flags)
   {
     disp.update(contrl.program,     // LCD has a lot of stuff to show
                 contrl.mode,
-                sq.state);        
+                sq.state,
+                sq.tseq);        
   }
 
   contrl.updateStatus();   // reads controller into status (user input)
@@ -53,7 +54,7 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = REVERB;
+  mode.menu = GEN;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.value = 0;
@@ -76,7 +77,7 @@ Controller::Controller(void)
   mode.tempoChange = true;
   mode.allNotesOff = false;
   // MIDI divisor
-  mode.divisor = 24;
+  mode.divisor = MIDI_TICKS_PER_BEAT;
 
   // initialize a program
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
@@ -230,7 +231,7 @@ void Controller::updateMode(extFlags_t flags)
       if ((mode.pointer == 0)) // Volume 
         mode.option = status.potValue[POT_1];
       else if ((mode.pointer == 3)) // Divisor
-        mode.option = (status.potValue[POT_1]>>2)+1;   // from 1 up to 32
+        mode.option = (status.potValue[POT_1])+1;   // from 1 up to 128
       else // Detune (spread) or Pan spread
         // get 8 options
         mode.option = status.potValue[POT_1]>>4;

@@ -19,6 +19,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   state.chordStep = CHORD_STEP;
   state.numChordNotes = NUM_CHORD_NOTES;
   state.divisor = MIDI_TICKS_PER_BEAT;
+  state.mode = ARP1;
   
   for (int i=0; i<state.voices; i++) {
     allNotesOff(i); 
@@ -27,6 +28,7 @@ Sequencer::Sequencer(void) : Fluxamasynth()
     setChorus(i, 0, 0, 0, 0 );
     setReverb(i, 0, 0, 0);
   }
+  
 }
 
 void Sequencer::tick(void)
@@ -55,31 +57,59 @@ void Sequencer::tick(void)
 
 void Sequencer::playStep(int step)
 {
-  if (seq[step] != 0)
+  switch(state.mode)
   {
-    if (state.currentTick == 0) 
-      playChord(seq[step], state.numChordNotes, true);
-    if (state.currentTick == state.divisor-1)
-      playChord(seq[step], state.numChordNotes, false);
+    case CHORD:
+      if (seq[step] > 0)
+      {
+        if (state.currentTick == 0) 
+          playChord(seq[step], state.numChordNotes, true);
+        if (state.currentTick == state.divisor-1)
+          playChord(seq[step], state.numChordNotes, false);
+      }
+    break;
+
+    case ARP1:
+      if (seq[step] > 0) playFineSequenceTick();
+      break;
+
+    default:
+      break;
   }
 }
 
 void Sequencer::playChord(int pitch, int numNotes, bool gate)
 {
-    for (int j=0; j<numNotes; j++)
-    {
-      for(int i = 0; i < state.voices; i++) {
-        int degree = (j*state.chordStep)%SCALE_SIZE;
-        int octaves = (j*state.chordStep-degree)/SCALE_SIZE;
-        if (gate) {
-          noteOn(i, pitch+12*octaves+minor_scaleI[degree], 100);
-          pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
-        } else {
-          //noteOff(i, pitch+12*octaves+minor_scaleI[degree]);
-        }
+  for (int j=0; j<numNotes; j++)
+  {
+    for(int i = 0; i < state.voices; i++) {
+      int degree = (j*state.chordStep)%SCALE_SIZE;
+      int octaves = (j*state.chordStep-degree)/SCALE_SIZE;
+      if (gate) {
+        noteOn(i, pitch+12*octaves+minor_scaleI[degree], 100);
+        pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
+      } else {
+        noteOff(i, pitch+12*octaves+minor_scaleI[degree]);
       }
     }
+  }
 }
+
+void Sequencer::playFineSequenceTick(void)
+{
+  int poly = 0;
+  if (tseq.onSeq[state.currentStep][state.currentTick][poly] > 0) {
+      for(int i = 0; i < state.voices; i++) {
+        noteOn(i, tseq.onSeq[state.currentStep][state.currentTick][poly], 100);
+        pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
+      }
+  }
+  if (tseq.offSeq[state.currentStep][state.currentTick][poly] > 0) {
+    for(int i = 0; i < state.voices; i++) 
+      noteOff(i, tseq.offSeq[state.currentStep][state.currentTick][poly]);
+  }
+}
+
 
 void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
 {
@@ -90,11 +120,28 @@ void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
     state.numChordNotes = mode.numChordNotes;
     state.spread = mode.spread;
     state.divisor = mode.divisor;
-    for (int i=0; i<NUM_STEPS0; i++)
-      // pSeq is scale degree based so 1 is root
-      // Also, if 0 is found then it is preserved (silence)
-      if (mode.pSeq[i] == 0) seq[i] = 0;
-      else seq[i] = (mode.pSeq[i]-1)+state.root;
+    switch(state.mode)
+    {
+      case CHORD:
+        for (int i=0; i<NUM_STEPS0; i++) {
+          // pSeq is scale degree based so 1 is root
+          // Also, if 0 is found then it is preserved (silence)
+          if (mode.pSeq[i] == 0) seq[i] = 0;
+          else seq[i] = (mode.pSeq[i]-1)+state.root;
+        }
+        break;
+      
+      case ARP1:
+        for (int i=0; i<NUM_STEPS0; i++) {
+          // pSeq is scale degree based so 1 is root
+          // Also, if 0 is found then it is preserved (silence)
+          if (mode.pSeq[i] == 0) seq[i] = 0;
+          else tseq.programFineStep(state.mode, i, (mode.pSeq[i]-1)+state.root);
+        }
+        break;
+
+      default: break;
+    }
   }
 
   if (mode.allNotesOff) 
@@ -146,17 +193,68 @@ void Sequencer::progChange(synthProgram_t program)
   // program.update flag is cleared by the same method that sets it
 }
 
-void Sequencer::initSequence(void)
+void Sequencer::playAllNotesOff(void) 
 {
-/*int interval = 0;
-  int degree = 0;
-  int scaleSize = SCALE_SIZE;
-  for(int step = 0; step < NUM_STEPS0; step++) {
-    degree = step%scaleSize;
-    if (step == 0) interval = 0;
-    else interval = interval+minor_scale1[degree];
-    seq[step]= root+interval;
-  } */
+  for (int i=0; i<state.voices; i++) {
+    allNotesOff(i); 
+  }
+}
+
+/*---------------------------------------------------------------*/
+// Constructor
+fineStepSequence::fineStepSequence(void)
+{
+  for (int i = 0; i < NUM_STEPS0; i++)
+    for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++)
+      for (int n = 0; n < POLYPHONY; n++)
+      {
+        onSeq[i][j][n] = 0;     // zero means don't issue anything to Fluxamasynth
+        offSeq[i][j][n] = 0;
+      }
+}
+
+void fineStepSequence::programFineStep(sq_mode_e mode, int step, int root)
+{
+  /*switch(mode)
+  {
+    case ARP1:*/
+
+      int poly = 0;
+      int interval = 4; // major thirds
+      int pitch = root;
+      //onSeq[step][0][poly] = pitch;
+      //offSeq[step][23][poly] = pitch;
+      for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
+        if ( (j%(MIDI_TICKS_PER_BEAT/4) == 0) )
+          onSeq[step][j][poly] = pitch;
+        if ( (j%(MIDI_TICKS_PER_BEAT/4)) == (MIDI_TICKS_PER_BEAT-1) ) {
+          offSeq[step][j][poly] = pitch;
+          pitch = pitch + interval;
+        }
+      }
+      /*
+      for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
+        if ( !(j%(MIDI_TICKS_PER_BEAT/POLYPHONY)) )
+          if (voice < POLYPHONY) { 
+            onSeq[step][j][voice] = root+voice*interval;
+            voice++;
+          }
+        voice = 0;
+        if ( j == (MIDI_TICKS_PER_BEAT-1) )  // last tick all chord goes off
+          do { 
+            offSeq[step][j][voice] = root+voice*interval;
+            voice++;
+          } while (voice < POLYPHONY);
+      }
+      
+      break;
+
+    case CHORD:
+      break;
+
+    default:
+      break;
+  }*/
 }
 
 /*

@@ -41,6 +41,7 @@
 #define BASE_TEMPO          60
 #define DEFAULT_ROOT        52  // E
 #define NUM_UNISON_VOICES   4
+#define POLYPHONY           4   
 #define NUM_CHORD_NOTES     3
 #define CHORD_STEP          2
 #define UNISON_PITCH_SPREAD 128
@@ -50,7 +51,7 @@
 #define INITIAL_VOICE_VOL   64
 
 // MIDI
-#define MIDI_TICKS_PER_BEAT 24    // this is the default sequencer divisor
+#define MIDI_TICKS_PER_BEAT 96    // this is the default sequencer divisor
 #define MIDI_CHANNEL        15
 
 // music defines
@@ -73,7 +74,8 @@
 enum mode_e { PC, GEN, MIX, SEQ, HARM_MODE, SEQ_MODE, CHORUS, REVERB, last };
 enum transport_e { STOP, PLAY, PAUSE };
 //enum reverb_parameter_e { VOL, PROG, DELAY, FEEDB, RATE, DEPTH, last };
-
+// sequencer modes
+enum sq_mode_e { CHORD, ARP1 };
 
 struct controllerStatus {
   bool potChanged[NUM_POTS];        // indicates if there was change
@@ -136,6 +138,7 @@ typedef struct Program_s synthProgram_t;
 
 struct sequencerState {
   transport_e trans;
+  sq_mode_e mode;
   int tempo;  // rename to bpm
   int root;
   int chordStep;
@@ -147,6 +150,7 @@ struct sequencerState {
   int currentTick;
   int currentStep;
   int divisor;
+
 };
 typedef struct sequencerState sequencerState_t;
 

@@ -96,6 +96,7 @@ void checkMIDI(void)
       
       case midi::Stop:
         phlxm->contrl.mode.trans = STOP;
+        phlxm->sq.playAllNotesOff();
         break;
 
       case midi::Continue:
@@ -103,9 +104,12 @@ void checkMIDI(void)
         break;      
 
       case midi::NoteOn:
-        phlxm->contrl.mode.root = MIDI.getData1();
-        //MIDI.getData2();  // velocity
-        flags.updateSequence = true;
+        int incomingPitch = MIDI.getData1();  
+        if (incomingPitch != phlxm->contrl.mode.root) {
+          flags.updateSequence = true;
+          phlxm->contrl.mode.root = incomingPitch;
+        }
+        //MIDI.getData2();  
         break;
       
       case midi::NoteOff:

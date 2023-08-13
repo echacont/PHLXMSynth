@@ -8,6 +8,14 @@
 #include <Fluxamasynth.h>
 #include "defines.h"
 
+
+struct fineStepSequence {
+  byte onSeq[NUM_STEPS0][MIDI_TICKS_PER_BEAT][POLYPHONY];
+  byte offSeq[NUM_STEPS0][MIDI_TICKS_PER_BEAT][POLYPHONY];
+  fineStepSequence(void);
+  void programFineStep(sq_mode_e mode, int step, int root);
+};
+
 // sequencer control the synth so it 
 // derives from Fluxamasynth
 class Sequencer : private Fluxamasynth
@@ -22,18 +30,22 @@ class Sequencer : private Fluxamasynth
   // step sequence
   int seq[NUM_STEPS0];
   //Step seq[NUM_STEPS0];
+  
+  // fine step sequence
+  fineStepSequence tseq;
 
   sequencerState_t state; 
 
   Sequencer(void);
   void tick(void);
-  void initSequence(void);
+  void initFineSequence(int);
   void updateSequencer(controllerMode_t mode, extFlags_t flags);
   void progChange(synthProgram_t program);
   void playStep(int step);
   void playChord(int pitch, int numNotes, bool gate);
+  void playFineSequenceTick(void);
+  void playAllNotesOff(void);
 };
-
 
 /*
 struct Note {
