@@ -18,7 +18,7 @@
 #define PIN_BUTTON_2        2
 #define PIN_BUTTON_1        3
 #define PIN_BUTTON_0        4
-#define NUM_DEBOUNCES       3
+#define NUM_DEBOUNCES       2
 #define BUTTON_0            0
 #define BUTTON_1            1
 #define BUTTON_2            2

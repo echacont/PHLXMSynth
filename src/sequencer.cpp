@@ -70,7 +70,7 @@ void Sequencer::playStep(int step)
     break;
 
     case ARP1:
-      if (seq[step] > 0) playFineSequenceTick();
+      if (seq[step] > 0) playFineSequenceTick(seq[step]);
       break;
 
     default:
@@ -95,19 +95,21 @@ void Sequencer::playChord(int pitch, int numNotes, bool gate)
   }
 }
 
-void Sequencer::playFineSequenceTick(void)
+void Sequencer::playFineSequenceTick(int pitch)
 {
-  int poly = 0;
-  if (tseq.onSeq[state.currentStep][state.currentTick][poly] > 0) {
-      for(int i = 0; i < state.voices; i++) {
-        noteOn(i, tseq.onSeq[state.currentStep][state.currentTick][poly], 100);
-        pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
+  if (tseq.onSeq[state.currentTick] > 0) {
+    for(int i = 0; i < state.voices; i++) {
+      noteOn(i, pitch+tseq.onSeq[state.currentTick]-1, 100);
+      pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
       }
   }
-  if (tseq.offSeq[state.currentStep][state.currentTick][poly] > 0) {
+  if (tseq.offSeq[state.currentTick] > 0) {
     for(int i = 0; i < state.voices; i++) 
-      noteOff(i, tseq.offSeq[state.currentStep][state.currentTick][poly]);
+      noteOff(i, pitch+tseq.offSeq[state.currentTick]-1);
   }
+  if ((state.currentStep == NUM_STEPS0-1) && (state.currentTick == MIDI_TICKS_PER_BEAT-1))
+    for(int i = 0; i < state.voices; i++) 
+      allNotesOff(i); 
 }
 
 
@@ -120,28 +122,15 @@ void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
     state.numChordNotes = mode.numChordNotes;
     state.spread = mode.spread;
     state.divisor = mode.divisor;
-    switch(state.mode)
-    {
-      case CHORD:
+
         for (int i=0; i<NUM_STEPS0; i++) {
           // pSeq is scale degree based so 1 is root
           // Also, if 0 is found then it is preserved (silence)
           if (mode.pSeq[i] == 0) seq[i] = 0;
           else seq[i] = (mode.pSeq[i]-1)+state.root;
+          if (state.mode == ARP1) 
+            tseq.programFineStep(state.mode, minor_scaleI, state.numChordNotes, state.chordStep);
         }
-        break;
-      
-      case ARP1:
-        for (int i=0; i<NUM_STEPS0; i++) {
-          // pSeq is scale degree based so 1 is root
-          // Also, if 0 is found then it is preserved (silence)
-          if (mode.pSeq[i] == 0) seq[i] = 0;
-          else tseq.programFineStep(state.mode, i, (mode.pSeq[i]-1)+state.root);
-        }
-        break;
-
-      default: break;
-    }
   }
 
   if (mode.allNotesOff) 
@@ -204,49 +193,37 @@ void Sequencer::playAllNotesOff(void)
 // Constructor
 fineStepSequence::fineStepSequence(void)
 {
-  for (int i = 0; i < NUM_STEPS0; i++)
-    for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++)
-      for (int n = 0; n < POLYPHONY; n++)
-      {
-        onSeq[i][j][n] = 0;     // zero means don't issue anything to Fluxamasynth
-        offSeq[i][j][n] = 0;
-      }
+  for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++)
+  {
+        onSeq[j] = 0;     // zero means don't issue anything to Fluxamasynth
+        offSeq[j] = 0;
+  }
 }
 
-void fineStepSequence::programFineStep(sq_mode_e mode, int step, int root)
+void fineStepSequence::programFineStep(sq_mode_e mode, int8_t intervals[SCALE_SIZE], int8_t numChordNotes, int8_t chordStep)
 {
-  /*switch(mode)
+  switch(mode)
   {
-    case ARP1:*/
+    case ARP1:
+      int degree = 0;
+      int tStep = MIDI_TICKS_PER_BEAT/numChordNotes;
+      //int tStep = 6;
+      int gate = tStep-1;
 
-      int poly = 0;
-      int interval = 4; // major thirds
-      int pitch = root;
-      //onSeq[step][0][poly] = pitch;
-      //offSeq[step][23][poly] = pitch;
+    //for(int i = 0; i < state.voices; i++) {
+    //  int degree = (j*state.chordStep)%SCALE_SIZE;
+    //  int octaves = (j*state.chordStep-degree)/SCALE_SIZE;
+      int8_t n = 0;
       for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
-        if ( (j%(MIDI_TICKS_PER_BEAT/4) == 0) )
-          onSeq[step][j][poly] = pitch;
-        if ( (j%(MIDI_TICKS_PER_BEAT/4)) == (MIDI_TICKS_PER_BEAT-1) ) {
-          offSeq[step][j][poly] = pitch;
-          pitch = pitch + interval;
-        }
+        if ( (j%tStep) == 0 ) {
+          degree = (n*chordStep)%SCALE_SIZE;
+          onSeq[j] = intervals[degree]+1;
+        } else onSeq[j] = 0;
+        if ( (j%tStep) == gate ) {
+          offSeq[j] = intervals[degree]+1;
+          n++;
+        } else offSeq[j] = 0;
       }
-      /*
-      for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
-        if ( !(j%(MIDI_TICKS_PER_BEAT/POLYPHONY)) )
-          if (voice < POLYPHONY) { 
-            onSeq[step][j][voice] = root+voice*interval;
-            voice++;
-          }
-        voice = 0;
-        if ( j == (MIDI_TICKS_PER_BEAT-1) )  // last tick all chord goes off
-          do { 
-            offSeq[step][j][voice] = root+voice*interval;
-            voice++;
-          } while (voice < POLYPHONY);
-      }
-      
       break;
 
     case CHORD:
@@ -254,7 +231,7 @@ void fineStepSequence::programFineStep(sq_mode_e mode, int step, int root)
 
     default:
       break;
-  }*/
+  }
 }
 
 /*

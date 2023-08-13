@@ -8,12 +8,17 @@
 #include <Fluxamasynth.h>
 #include "defines.h"
 
-
-struct fineStepSequence {
-  byte onSeq[NUM_STEPS0][MIDI_TICKS_PER_BEAT][POLYPHONY];
-  byte offSeq[NUM_STEPS0][MIDI_TICKS_PER_BEAT][POLYPHONY];
+// this of course can be a good way to blow up the memory
+class fineStepSequence {
+  public:
+  // these arrays contain interval values, not absolute pitches.
+  int8_t onSeq[MIDI_TICKS_PER_BEAT];
+  int8_t offSeq[MIDI_TICKS_PER_BEAT];
   fineStepSequence(void);
-  void programFineStep(sq_mode_e mode, int step, int root);
+  void programFineStep(sq_mode_e mode, 
+                       int8_t intervals[SCALE_SIZE], 
+                       int8_t numChordNotes, 
+                       int8_t chordStep);
 };
 
 // sequencer control the synth so it 
@@ -24,11 +29,11 @@ class Sequencer : private Fluxamasynth
   public:
   // scales
   //int major_scale[7]  = {2, 2, 1, 2, 2, 2, 1};     // major scale
-  int minor_scale[SCALE_SIZE] =  {2, 1, 2, 2, 2, 1, 2};     // minor scale
-  int minor_scaleI[SCALE_SIZE] = {0, 2, 3, 5, 7, 9, 10};     // minor scale
+  int8_t minor_scale[SCALE_SIZE] =  {2, 1, 2, 2, 2, 1, 2};     // minor scale
+  int8_t minor_scaleI[SCALE_SIZE] = {0, 2, 3, 5, 7, 9, 10};     // minor scale
 
   // step sequence
-  int seq[NUM_STEPS0];
+  int8_t seq[NUM_STEPS0];
   //Step seq[NUM_STEPS0];
   
   // fine step sequence
@@ -43,7 +48,7 @@ class Sequencer : private Fluxamasynth
   void progChange(synthProgram_t program);
   void playStep(int step);
   void playChord(int pitch, int numNotes, bool gate);
-  void playFineSequenceTick(void);
+  void playFineSequenceTick(int);
   void playAllNotesOff(void);
 };
 

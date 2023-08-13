@@ -100,9 +100,9 @@ void Lcdisp::update(synthProgram_t program,
         write(LCD_0_SYMBOL+mode.pSeq[i]);
       setCursor(15,0);write(LCD_0_SYMBOL+state.currentStep+1);
       setCursor(0,1);
-      print(state.currentTick, HEX);  write(LCD_SPACE_SYMBOL);
+      print(state.currentTick);  write(LCD_SPACE_SYMBOL);
       setCursor(3,1);
-      print(tseq.onSeq[state.currentStep][state.currentTick][0], HEX);  write(LCD_SPACE_SYMBOL);
+      if (tseq.onSeq[state.currentTick] > 0) print(tseq.onSeq[state.currentTick], HEX);  write(LCD_SPACE_SYMBOL);
       setCursor(6,1);
       for (int i=0; i<NUM_STEPS0; i++) 
         printPointer(mode.pointer, i, 6+i,1);

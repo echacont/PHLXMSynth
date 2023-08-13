@@ -54,7 +54,7 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
-  mode.menu = GEN;
+  mode.menu = SEQ;
   mode.trans = STOP;
   mode.pointer = 0;
   mode.value = 0;

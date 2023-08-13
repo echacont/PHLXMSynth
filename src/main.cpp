@@ -13,8 +13,8 @@
 #define USE_TIMER_3                   false
 #define USE_TIMER_4                   false
 #define USE_TIMER_5                   false
-#define TIMER1_INTERVAL_MS            7
-#define TIMER2_INTERVAL_MS            54
+#define TIMER1_INTERVAL_MS            3
+#define TIMER2_INTERVAL_MS            53
 
 #include <Arduino.h>
 #include "PHLXM.h"
@@ -87,7 +87,7 @@ void checkMIDI(void)
         // instrumentation external signal GPIO 53
         toggle3 = !toggle3; digitalWrite(53, toggle3);
         phlxm->sq.tick();
-        flags.runSequencerTick = true;    
+        //flags.runSequencerTick = true;//not used
         break;
 
       case midi::Start:
