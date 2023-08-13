@@ -18,7 +18,7 @@ void PHLXM::run(extFlags_t flags)
   // TODO: these flags could be checked inside of tick and updates
   //if (flags.runSequencerTick)
   //  sq.tick();
-  //if (flags.updateDisplay) 
+  if (flags.updateDisplay) 
   {
     disp.update(contrl.program,     // LCD has a lot of stuff to show
                 contrl.mode,
@@ -269,6 +269,7 @@ void Controller::updateMode(extFlags_t flags)
           program.update = true;
           break;
         case 3: 
+          if (mode.option > 96) mode.option = 96;
           mode.divisor = mode.option;
           mode.updateSeq = true;
           //mode.tempo = mode.option + BASE_TEMPO;

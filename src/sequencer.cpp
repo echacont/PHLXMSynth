@@ -66,6 +66,7 @@ void Sequencer::playStep(int step)
           playChord(seq[step], state.numChordNotes, true);
         if (state.currentTick == state.divisor-1)
           playChord(seq[step], state.numChordNotes, false);
+
       }
     break;
 
@@ -76,6 +77,9 @@ void Sequencer::playStep(int step)
     default:
       break;
   }
+  if ((state.currentStep == NUM_STEPS0-1) && (state.currentTick == state.divisor-1))
+    for(int i = 0; i < state.voices; i++) 
+      allNotesOff(i); 
 }
 
 void Sequencer::playChord(int pitch, int numNotes, bool gate)
@@ -107,9 +111,6 @@ void Sequencer::playFineSequenceTick(int pitch)
     for(int i = 0; i < state.voices; i++) 
       noteOff(i, pitch+tseq.offSeq[state.currentTick]-1);
   }
-  if ((state.currentStep == NUM_STEPS0-1) && (state.currentTick == MIDI_TICKS_PER_BEAT-1))
-    for(int i = 0; i < state.voices; i++) 
-      allNotesOff(i); 
 }
 
 
