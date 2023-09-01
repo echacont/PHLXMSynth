@@ -22,6 +22,7 @@ void PHLXM::run(extFlags_t flags)
                 contrl.mode,
                 sq.state,
                 sq.tseq);
+    flags.updateDisplay = false;
   }
 
   contrl.updateStatus();   // reads controller into status (user input)
