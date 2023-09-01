@@ -54,6 +54,7 @@ Controller::Controller(void)
       buttondeBounce[j][i] = false;
 
   // initialize the controller mode
+  // TODO: put all this into the controllerMode constructor
   mode.menu = SEQ;
   mode.trans = STOP;
   mode.pointer = 0;
@@ -64,13 +65,14 @@ Controller::Controller(void)
   mode.root = DEFAULT_ROOT;
   mode.chordStep = CHORD_STEP;
   mode.numChordNotes = NUM_CHORD_NOTES;
-  mode.arpMode = CHORD_MODE;
+  mode.arpMode = ARP1_MODE;
   ///////////////////////////////////////////////////////
   mode.tempo = BASE_TEMPO;
   mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
   ///////////////////////////////////////////////////////
+  int8_t initialPSeq[NUM_STEPS0] = {1,3,1,5,1,3,1,5};
   for (int i=0; i<NUM_STEPS0; i++)
-    mode.pSeq[i] = 1;
+    mode.pSeq[i] = initialPSeq[i];
   mode.spread = UNISON_PITCH_SPREAD;
   // flags
   mode.menuChanged = true;
@@ -81,21 +83,26 @@ Controller::Controller(void)
   mode.divisor = MIDI_TICKS_PER_BEAT;
 
   // initialize a program
+  // TODO put this into a constructor of its own
+  program.voiceProgram[0] = INITIAL_PROGRAM_1;
+  program.voiceProgram[1] = INITIAL_PROGRAM_2;
+  program.voiceProgram[2] = INITIAL_PROGRAM_3;
+  program.voiceProgram[3] = INITIAL_PROGRAM_4;
   for (int i=0; i<NUM_UNISON_VOICES; i++) {
-    program.voiceProgram[i] = INITIAL_PROGRAM;
+    //program.voiceProgram[i] = INITIAL_PROGRAM;
     program.voiceVol[i] = INITIAL_VOICE_VOL;
     // voice FX
-    program.chorusType[i]  = 0;
-    program.chorusLevel[i] = 0;
-    program.chorusDelay[i] = 0;
-    program.chorusFdbk[i]  = 0;
-    program.chorusRate[i]  = 0;
-    program.chorusDepth[i] = 0;
-    program.reverbType[i]  = 0;
-    program.reverbLevel[i] = 0;
-    program.reverbFdbk[i]  = 0;
+    program.chorusType[i]  = DEFAULT_CHORUS_TYPE;
+    program.chorusLevel[i] = DEFAULT_CHORUS_LEVEL;
+    program.chorusDelay[i] = DEFAULT_CHORUS_DELAY;
+    program.chorusFdbk[i]  = DEFAULT_CHORUS_FDBK;
+    program.chorusRate[i]  = DEFAULT_CHORUS_RATE;
+    program.chorusDepth[i] = DEFAULT_CHORUS_DEPTH;
+    program.reverbType[i]  = DEFAULT_REVERB_TYPE;
+    program.reverbLevel[i] = DEFAULT_REVERB_LEVEL;
+    program.reverbFdbk[i]  = DEFAULT_REVERB_FDBK;
   }
-  program.bank = 127; // use the MT-32 sound bank
+  program.bank = INITIAL_BANK; // use the MT-32 sound bank
   program.masterVol = INITIAL_MASTER_VOL;
   program.panspread = UNISON_PAN_SPREAD; 
   program.update = true;

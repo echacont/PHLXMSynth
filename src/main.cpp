@@ -14,7 +14,7 @@
 #define USE_TIMER_4                   false
 #define USE_TIMER_5                   false
 #define TIMER1_INTERVAL_MS            3
-#define TIMER2_INTERVAL_MS            53
+#define TIMER2_INTERVAL_MS            101
 
 #include <Arduino.h>
 #include "PHLXM.h"
@@ -31,7 +31,13 @@ void checkMIDI(void);
 // external midi
 void TimerHandler1()
 {
+  static bool toggle3 = false;
+  noInterrupts();
+  // instrumentation external signal GPIO 53
+  toggle3 = !toggle3; digitalWrite(53, toggle3);
   checkMIDI();
+  toggle3 = !toggle3; digitalWrite(53, toggle3);
+  interrupts();
 }
 
 // display refresh
@@ -65,6 +71,7 @@ void setup ()
   pinMode(PIN_LED_RED, OUTPUT);
   digitalWrite(PIN_LED_GRN, HIGH);
   digitalWrite(PIN_LED_RED, HIGH);
+  phlxm->sq.progChange(phlxm->contrl.program);
 }
 
 void loop () 
@@ -76,16 +83,13 @@ void loop ()
 
 void checkMIDI(void)
 {
-  static bool toggle3 = false;
-
-  noInterrupts();
+  
   if(MIDI.read())
   {
     switch(MIDI.getType())
     {
       case midi::Clock:
-        // instrumentation external signal GPIO 53
-        toggle3 = !toggle3; digitalWrite(53, toggle3);
+
         phlxm->sq.tick();
         //flags.runSequencerTick = true;//not used
         break;
@@ -119,5 +123,5 @@ void checkMIDI(void)
         break;
     }
   }
-  interrupts();
+  
 }

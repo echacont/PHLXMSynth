@@ -29,6 +29,7 @@ class Lcdisp : private LiquidCrystal_I2C
               sequencerState_t state,
               fineStepSequence tseq); 
   void Lcdisp::printPointer(int p, int i, int col, int row);
+  void Lcdisp::printStepAndPointer(int p, int8_t s, int i, int col, int row);
 };
 
 enum PC_opts_e { VPC } ;

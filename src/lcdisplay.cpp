@@ -104,7 +104,7 @@ void Lcdisp::update(synthProgram_t program,
       if (tseq.onSeq[state.currentTick] > 0) print(tseq.onSeq[state.currentTick], HEX);  write(LCD_SPACE_SYMBOL);
       setCursor(6,1);
       for (int i=0; i<NUM_STEPS0; i++) 
-        printPointer(mode.pointer, i, 6+i,1);
+        printStepAndPointer(mode.pointer, state.currentStep, i, 6+i,1);
       setCursor(14,1); 
       write(LCD_LEFT_SYMBOL); write(LCD_0_SYMBOL+(mode.option));
       break;
@@ -226,7 +226,7 @@ void Lcdisp::update(synthProgram_t program,
         else if (mode.value>>5 == REVERB_TYPE  ) { print("Type   ");     }
         else if (mode.value>>5 == REVERB_FDBK  ) { print("Fdbak  "); }
         else {                                     print("----   "); }
-        if (mode.value>>4 == mode.fxParam) write(LCD_LEFT_SYMBOL);
+        if (mode.value>>5 == mode.fxParam) write(LCD_LEFT_SYMBOL);
         else write(LCD_SPACE_SYMBOL); 
       } else { // else show current parameter (program.fxParam)
         if      (mode.fxParam == REVERB_LEVEL ) { print("Level  ");    }
@@ -284,6 +284,14 @@ void Lcdisp::printPointer(int p, int i, int col, int row)
 {
   setCursor(col, row);
   if (i == p) write(LCD_STAR_SYMBOL);
+  else write(LCD_SPACE_SYMBOL);
+}
+
+void Lcdisp::printStepAndPointer(int p, int8_t s, int i, int col, int row)
+{
+  setCursor(col, row);
+  if (i == p) write(LCD_STAR_SYMBOL);
+  else if (i == s) write(LCD_SQUARE_SYMBOL);
   else write(LCD_SPACE_SYMBOL);
 }
 

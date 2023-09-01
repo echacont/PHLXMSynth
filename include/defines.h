@@ -42,18 +42,23 @@
 #define DEFAULT_ROOT        52  // E
 #define NUM_UNISON_VOICES   4
 #define POLYPHONY           4   
-#define NUM_CHORD_NOTES     3
-#define CHORD_STEP          2
+#define NUM_CHORD_NOTES     4
+#define CHORD_STEP          5
 #define CHORD_MODE          0
 #define ARP1_MODE           1
-#define UNISON_PITCH_SPREAD 128
+// default program
+#define UNISON_PITCH_SPREAD 64
 #define UNISON_PAN_SPREAD   32
-#define INITIAL_PROGRAM     32
+#define INITIAL_BANK        127 // MT-32
+#define INITIAL_PROGRAM_1   31  // Fantasia
+#define INITIAL_PROGRAM_2   38  // Atmosphere
+#define INITIAL_PROGRAM_3   112 // Pan Flute
+#define INITIAL_PROGRAM_4   93  // French Horn
 #define INITIAL_MASTER_VOL  64
 #define INITIAL_VOICE_VOL   64
 
 // MIDI
-#define MIDI_TICKS_PER_BEAT 96    // this is the default sequencer divisor
+#define MIDI_TICKS_PER_BEAT 48    // this is the default sequencer divisor
 #define MIDI_CHANNEL        15
 
 // music defines
@@ -66,11 +71,22 @@
 #define CHORUS_FDBK         3
 #define CHORUS_RATE         4
 #define CHORUS_DEPTH        5
+// default chorus program
+#define DEFAULT_CHORUS_LEVEL        0x30
+#define DEFAULT_CHORUS_TYPE         6
+#define DEFAULT_CHORUS_DELAY        0x30
+#define DEFAULT_CHORUS_FDBK         0x10
+#define DEFAULT_CHORUS_RATE         0x0
+#define DEFAULT_CHORUS_DEPTH        0x0
 
 // reverb
 #define REVERB_LEVEL        0
 #define REVERB_TYPE         1
 #define REVERB_FDBK         3
+// default reverb program
+#define DEFAULT_REVERB_LEVEL        0x80
+#define DEFAULT_REVERB_TYPE         3
+#define DEFAULT_REVERB_FDBK         0x40
 
 // enumerated types
 enum mode_e { PC, GEN, MIX, SEQ, HARM_MODE, SEQ_MODE, CHORUS, REVERB, last };
@@ -153,7 +169,8 @@ struct sequencerState {
   int currentTick;
   int currentStep;
   int divisor;
-
+  int8_t seqCycles;
+  int8_t notesPlayed;
 };
 typedef struct sequencerState sequencerState_t;
 
