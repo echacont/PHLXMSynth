@@ -121,7 +121,8 @@ void Lcdisp::update(synthProgram_t program,
       printPointer(mode.pointer, 0, 4, 1);
       setCursor(5,1); 
       if (state.mode == CHORD) print("ch");
-      else if (state.mode == ARP1) print ("a1");      
+      else if (state.mode == ARP1) print ("a1"); 
+      else if (state.mode == ARP2) print ("a2");      
       break;
 
 

@@ -16,14 +16,12 @@ void PHLXM::run(extFlags_t flags)
   sq.updateSequencer(contrl.mode, flags);// apply user sequence
 
   // TODO: these flags could be checked inside of tick and updates
-  //if (flags.runSequencerTick)
-  //  sq.tick();
   if (flags.updateDisplay) 
   {
     disp.update(contrl.program,     // LCD has a lot of stuff to show
                 contrl.mode,
                 sq.state,
-                sq.tseq);        
+                sq.tseq);
   }
 
   contrl.updateStatus();   // reads controller into status (user input)
@@ -70,7 +68,7 @@ Controller::Controller(void)
   mode.tempo = BASE_TEMPO;
   mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
   ///////////////////////////////////////////////////////
-  int8_t initialPSeq[NUM_STEPS0] = {1,3,1,5,1,3,1,5};
+  int8_t initialPSeq[NUM_STEPS0] = {1,0,1,0,1,0,1,0};
   for (int i=0; i<NUM_STEPS0; i++)
     mode.pSeq[i] = initialPSeq[i];
   mode.spread = UNISON_PITCH_SPREAD;
@@ -199,12 +197,14 @@ void Controller::updateMode(extFlags_t flags)
       mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB 
     if (status.potChanged[POT_1] == true) {
       if (mode.pointer == 0) // ARP mode
-        mode.option = status.potValue[POT_1]>>6;  // two options
+        mode.option = status.potValue[POT_1]>>4;  // four options
     }
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
       if (mode.pointer == 0) { // ARP mode 
-        mode.arpMode = mode.option;
-        mode.updateSeq = true;
+        if (mode.option < 3) {
+          mode.arpMode = mode.option;
+          mode.updateSeq = true;
+        }
       }
     } 
     break;

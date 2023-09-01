@@ -13,7 +13,7 @@
 #define USE_TIMER_3                   false
 #define USE_TIMER_4                   false
 #define USE_TIMER_5                   false
-#define TIMER1_INTERVAL_MS            3
+#define TIMER1_INTERVAL_MS            1       // check for MIDI messages each ms. 
 #define TIMER2_INTERVAL_MS            101
 
 #include <Arduino.h>
@@ -89,9 +89,7 @@ void checkMIDI(void)
     switch(MIDI.getType())
     {
       case midi::Clock:
-
         phlxm->sq.tick();
-        //flags.runSequencerTick = true;//not used
         break;
 
       case midi::Start:

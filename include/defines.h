@@ -46,6 +46,7 @@
 #define CHORD_STEP          5
 #define CHORD_MODE          0
 #define ARP1_MODE           1
+#define ARP2_MODE           2
 // default program
 #define UNISON_PITCH_SPREAD 64
 #define UNISON_PAN_SPREAD   32
@@ -93,7 +94,7 @@ enum mode_e { PC, GEN, MIX, SEQ, HARM_MODE, SEQ_MODE, CHORUS, REVERB, last };
 enum transport_e { STOP, PLAY, PAUSE };
 //enum reverb_parameter_e { VOL, PROG, DELAY, FEEDB, RATE, DEPTH, last };
 // sequencer modes
-enum sq_mode_e { CHORD, ARP1 };
+enum sq_mode_e { CHORD, ARP1, ARP2 };
 
 struct controllerStatus {
   bool potChanged[NUM_POTS];        // indicates if there was change

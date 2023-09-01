@@ -78,6 +78,10 @@ void Sequencer::playStep(int step)
       if (seq[step] > 0) playFineSequenceTick(seq[step]);
       break;
 
+    case ARP2:
+      if (seq[step] > 0) playFineSequenceTick(seq[step]);
+      break;
+
     default:
       break;
   }
@@ -104,18 +108,41 @@ void Sequencer::playChord(int pitch, int numNotes, bool gate)
   }
 }
 
+// TODO: integrate chord mode here
 void Sequencer::playFineSequenceTick(int pitch)
 {
-  if (tseq.onSeq[state.currentTick] > 0) {
-    for(int i = 0; i < state.voices; i++) {
-      //if ((state.currentStep+state.seqCycles+state.notesPlayed)%state.voices > 0) 
-      {
-        noteOn(i, pitch+tseq.onSeq[state.currentTick]-1, ((state.currentTick-state.notesPlayed)%14)+86);
-        pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
-        state.notesPlayed++;
+  switch (state.mode)
+  {
+  case ARP1:
+    if (tseq.onSeq[state.currentTick] > 0) {
+      for(int i = 0; i < state.voices; i++) {
+        //if ((state.currentStep+state.seqCycles+state.notesPlayed)%state.voices > 0) 
+        {
+          noteOn(i, pitch+tseq.onSeq[state.currentTick]-1, ((state.currentTick-state.notesPlayed)%14)+86);
+          pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
+          state.notesPlayed++;
+        }
       }
     }
+    break;
+  
+  case ARP2:
+    if (tseq.onSeq[state.currentTick] > 0) {
+      for(int i = 0; i < state.voices; i++)
+      {
+          noteOn(i, pitch+tseq.onSeq[state.currentTick]-1, ((state.currentTick-state.notesPlayed)%14)+86);
+          noteOn(i, pitch+tseq.onSeq[state.currentTick]-1+minor_scaleI[2], ((state.currentTick-state.notesPlayed)%14)+86);
+          noteOn(i, pitch+tseq.onSeq[state.currentTick]-1+minor_scaleI[4], ((state.currentTick-state.notesPlayed)%14)+86);
+          pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
+          state.notesPlayed++;
+      }
+    }
+    break;
+
+  default:
+    break;
   }
+
   //if (tseq.offSeq[state.currentTick] > 0) {
     //for(int i = 0; i < state.voices; i++) 
       //noteOff(i, pitch+tseq.offSeq[state.currentTick]-1);
@@ -144,6 +171,7 @@ void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
     // ARP mode
     if (mode.arpMode == CHORD_MODE) state.mode = CHORD;
     else if (mode.arpMode == ARP1_MODE) state.mode = ARP1;
+    else if (mode.arpMode == ARP2_MODE) state.mode = ARP2;
   }
 
   if (mode.allNotesOff) 
@@ -215,14 +243,33 @@ fineStepSequence::fineStepSequence(void)
 
 void fineStepSequence::programFineStep(sq_mode_e mode, int8_t intervals[SCALE_SIZE], int8_t numChordNotes, int8_t chordStep)
 {
+  int8_t degree, tStep, gate, n;
   switch(mode)
   {
     case ARP1:
-      int degree = 0;
-      int tStep = MIDI_TICKS_PER_BEAT/numChordNotes;
+      degree = 0;
+      tStep = MIDI_TICKS_PER_BEAT/numChordNotes;
       //int tStep = 6;
-      int gate = tStep-1;
-      int8_t n = 0;
+      gate = tStep-1;
+      n = 0;
+      for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
+        if ( (j%tStep) == 0 ) {
+          degree = (n*chordStep)%SCALE_SIZE;
+          onSeq[j] = intervals[degree]+1;
+        } else onSeq[j] = 0;
+        if ( (j%tStep) == gate ) {
+          offSeq[j] = intervals[degree]+1;
+          n++;
+        } else offSeq[j] = 0;
+      }
+      break;
+
+    case ARP2:
+      degree = 0;
+      tStep = MIDI_TICKS_PER_BEAT/numChordNotes;
+      //int tStep = 6;
+      gate = tStep-1;
+      n = 0;
       for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
         if ( (j%tStep) == 0 ) {
           degree = (n*chordStep)%SCALE_SIZE;
