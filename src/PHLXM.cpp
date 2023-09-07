@@ -9,21 +9,20 @@ PHLXM::PHLXM(void)
 
 void PHLXM::run(extFlags_t flags)
 {
+  // last time I checked, run() takes around 100 ms to circle around
+  static bool toggle3 = false;
+  toggle3 = !toggle3; digitalWrite(53, toggle3);
   // right after the model constructors run at main::setup(), 
   // update synth program and sequencer state. Then get controller data, 
   // apply changes to models and come around again (and again and again....)
   sq.progChange(contrl.program);   // apply program change
   sq.updateSequencer(contrl.mode, flags);// apply user sequence
-
   // TODO: these flags could be checked inside of tick and updates
-  if (flags.updateDisplay) 
-  {
+
     disp.update(contrl.program,     // LCD has a lot of stuff to show
                 contrl.mode,
                 sq.state,
                 sq.tseq);
-    flags.updateDisplay = false;
-  }
 
   contrl.updateStatus();   // reads controller into status (user input)
   contrl.updateMode(flags);    // what needs to be done? Do it.
@@ -311,8 +310,8 @@ void Controller::updateMode(extFlags_t flags)
       mode.value = status.potValue[POT_1];
     }
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
-      // choose between the 4 voices
-      if (mode.pointer == 0) { mode.option = mode.value>>5; }
+      // choose between the 4 voices. Use voice 0 for all voices
+      if (mode.pointer == 0) { mode.option = 0 /*mode.value>>5*/ ; }
       // choose between 8 parameters (not all are used)
       else if (mode.pointer == 1) { mode.fxParam = mode.value>>4; } 
       // choose value: range depends on what parameter was chosen (fxParam)
@@ -366,7 +365,12 @@ void Controller::updateMode(extFlags_t flags)
     mode.menu = mode.menu+1;
     mode.menuChanged = true;
   }
+  if(status.buttonChanged[BUTTON_2] && status.buttonValue[BUTTON_2]) {
+    mode.menu = mode.menu-1;
+    mode.menuChanged = true;
+  }
   if (mode.menu == last) mode.menu = 0;
+  if (mode.menu < 0) mode.menu = last-1;
 
 
   // transport machine

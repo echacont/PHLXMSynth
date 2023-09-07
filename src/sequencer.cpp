@@ -128,13 +128,10 @@ void Sequencer::playFineSequenceTick(int pitch)
   
   case ARP2:
     if (tseq.onSeq[state.currentTick] > 0) {
-      for(int i = 0; i < state.voices; i++)
-      {
-          noteOn(i, pitch+tseq.onSeq[state.currentTick]-1, ((state.currentTick-state.notesPlayed)%14)+86);
-          noteOn(i, pitch+tseq.onSeq[state.currentTick]-1+minor_scaleI[2], ((state.currentTick-state.notesPlayed)%14)+86);
-          noteOn(i, pitch+tseq.onSeq[state.currentTick]-1+minor_scaleI[4], ((state.currentTick-state.notesPlayed)%14)+86);
-          pitchBend(i, 512 + (i-state.voices/2)*(state.spread/state.voices));
-          state.notesPlayed++;
+      if (state.currentTick%state.numChordNotes == 0) {
+        noteOn(state.currentTick%state.voices, pitch+tseq.onSeq[state.currentTick]+minor_scaleI[(state.currentTick%state.voices*state.chordStep)%7], ((state.currentTick-state.notesPlayed)%14)+86);
+        pitchBend(state.currentTick%state.voices, 512 + (state.currentTick%state.voices-state.voices/2)*(state.spread/state.voices));
+        state.notesPlayed++;
       }
     }
     break;
@@ -167,11 +164,13 @@ void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
           else seq[i] = (mode.pSeq[i]-1)+state.root;
           if (state.mode == ARP1) 
             tseq.programFineStep(state.mode, minor_scaleI, state.numChordNotes, state.chordStep);
+          else if (state.mode == ARP2) 
+            tseq.programFineStep(state.mode, minor_scaleI, state.numChordNotes, state.chordStep);
         }
     // ARP mode
     if (mode.arpMode == CHORD_MODE) state.mode = CHORD;
     else if (mode.arpMode == ARP1_MODE) state.mode = ARP1;
-    else if (mode.arpMode == ARP2_MODE) state.mode = ARP2;
+    else   state.mode = ARP2;
   }
 
   if (mode.allNotesOff) 
@@ -266,19 +265,12 @@ void fineStepSequence::programFineStep(sq_mode_e mode, int8_t intervals[SCALE_SI
 
     case ARP2:
       degree = 0;
-      tStep = MIDI_TICKS_PER_BEAT/numChordNotes;
-      //int tStep = 6;
-      gate = tStep-1;
       n = 0;
       for (int j = 0; j < MIDI_TICKS_PER_BEAT; j++) {
-        if ( (j%tStep) == 0 ) {
           degree = (n*chordStep)%SCALE_SIZE;
           onSeq[j] = intervals[degree]+1;
-        } else onSeq[j] = 0;
-        if ( (j%tStep) == gate ) {
-          offSeq[j] = intervals[degree]+1;
           n++;
-        } else offSeq[j] = 0;
+          if (n>numChordNotes) n = 0;
       }
       break;
 

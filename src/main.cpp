@@ -31,12 +31,12 @@ void checkMIDI(void);
 // external midi
 void TimerHandler1()
 {
-  static bool toggle3 = false;
+  //static bool toggle3 = false;
   noInterrupts();
   // instrumentation external signal GPIO 53
-  toggle3 = !toggle3; digitalWrite(53, toggle3);
+  //toggle3 = !toggle3; digitalWrite(53, toggle3);
   checkMIDI();
-  toggle3 = !toggle3; digitalWrite(53, toggle3);
+  //toggle3 = !toggle3; digitalWrite(53, toggle3);
   interrupts();
 }
 
@@ -84,7 +84,7 @@ void loop ()
 void checkMIDI(void)
 {
   
-  if(MIDI.read())
+  while(MIDI.read())
   {
     switch(MIDI.getType())
     {
@@ -105,13 +105,14 @@ void checkMIDI(void)
         phlxm->contrl.mode.trans = PLAY;
         break;      
 
+      // TODO: need to have a record of note event in the sequencer
       case midi::NoteOn:
         int incomingPitch = MIDI.getData1();  
         if (incomingPitch != phlxm->contrl.mode.root) {
           flags.updateSequence = true;
           phlxm->contrl.mode.root = incomingPitch;
         }
-        //MIDI.getData2();  
+        //MIDI.getData2();
         break;
       
       case midi::NoteOff:
