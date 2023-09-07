@@ -19,10 +19,10 @@ void PHLXM::run(extFlags_t flags)
   sq.updateSequencer(contrl.mode, flags);// apply user sequence
   // TODO: these flags could be checked inside of tick and updates
 
-    disp.update(contrl.program,     // LCD has a lot of stuff to show
-                contrl.mode,
-                sq.state,
-                sq.tseq);
+  disp.update(contrl.program,     // LCD has a lot of stuff to show
+              contrl.mode,
+              sq.state,
+              sq.tseq);
 
   contrl.updateStatus();   // reads controller into status (user input)
   contrl.updateMode(flags);    // what needs to be done? Do it.
@@ -64,10 +64,7 @@ Controller::Controller(void)
   mode.chordStep = CHORD_STEP;
   mode.numChordNotes = NUM_CHORD_NOTES;
   mode.arpMode = ARP1_MODE;
-  ///////////////////////////////////////////////////////
-  mode.tempo = BASE_TEMPO;
-  mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
-  ///////////////////////////////////////////////////////
+
   int8_t initialPSeq[NUM_STEPS0] = {1,0,1,0,1,0,1,0};
   for (int i=0; i<NUM_STEPS0; i++)
     mode.pSeq[i] = initialPSeq[i];
@@ -75,7 +72,6 @@ Controller::Controller(void)
   // flags
   mode.menuChanged = true;
   mode.updateSeq = true;
-  mode.tempoChange = true;
   mode.allNotesOff = false;
   // MIDI divisor
   mode.divisor = MIDI_TICKS_PER_BEAT;
@@ -163,7 +159,74 @@ void Controller::updateMode(extFlags_t flags)
   // state machine kinda
   switch (mode.menu)
   {
-  case PC:  // program change
+    // TODO: PC and MIX can go in to the same menu, using FX menu technique
+    case PC:  // program change
+      update_PC();
+      break;
+    case MIX:
+      update_MIX();
+      break;
+    case SEQ:
+      update_SEQ();
+      break;
+    case SEQ_MODE:
+      update_SEQ_MODE();
+      break;
+    // TODO: HARM_MODE and GEN have controls that need to go in the same page
+    case HARM_MODE:
+      update_HARM_MODE();
+      break; 
+    case GEN:
+      update_GEN();
+      break;
+    case CHORUS:
+      update_CHORUS();
+      break;
+    case REVERB:
+      update_REVERB();
+      break;
+
+    default:
+      break;
+  } // switch(mode.menu)
+
+  // scroll the menu
+  if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0]) {
+    mode.menu = mode.menu+1;
+    mode.menuChanged = true;
+  }
+  if(status.buttonChanged[BUTTON_2] && status.buttonValue[BUTTON_2]) {
+    mode.menu = mode.menu-1;
+    mode.menuChanged = true;
+  }
+  if (mode.menu == last) mode.menu = 0;
+  if (mode.menu < 0) mode.menu = last-1;
+
+  // transport machine
+  // transport machine uses button 2 for (PASE/STOP) and (PLAY)
+  /*
+  Commented out because transport is being handled with external MIDI
+  if(status.buttonChanged[BUTTON_2]) //} && status.buttonValue[BUTTON_0])
+  {
+    switch (mode.trans)
+    {
+      case STOP:
+        if (status.buttonValue[BUTTON_2]) mode.trans = PLAY;
+        break;
+      case PAUSE:
+        if (!status.buttonValue[BUTTON_2])
+            mode.trans = STOP;
+        break;
+      case PLAY:
+        if (status.buttonValue[BUTTON_2]) mode.trans = PAUSE;
+        break;
+    }
+  }
+  */
+}
+
+void Controller::update_PC(void)
+{
     if (status.potChanged[POT_0] == true) {
       mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB
     }
@@ -174,10 +237,11 @@ void Controller::updateMode(extFlags_t flags)
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
       program.voiceProgram[mode.pointer] = mode.option;
       program.update = true;
-    }
-    break;
-  
-  case SEQ:
+    } 
+}
+
+void Controller::update_SEQ(void)
+{
     if (status.potChanged[POT_0] == true) {
       // get 3 MSB because sequencer has 8 steps
       mode.pointer = status.potValue[POT_0]>>4; 
@@ -190,10 +254,11 @@ void Controller::updateMode(extFlags_t flags)
       mode.pSeq[mode.pointer] = mode.option;
       mode.updateSeq = true;
     }
-    break;
+}
 
-  case SEQ_MODE:
-    if (status.potChanged[POT_0] == true)
+void Controller::update_SEQ_MODE(void)
+{
+      if (status.potChanged[POT_0] == true)
       mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB 
     if (status.potChanged[POT_1] == true) {
       if (mode.pointer == 0) // ARP mode
@@ -207,10 +272,10 @@ void Controller::updateMode(extFlags_t flags)
         }
       }
     } 
-    break;
-
-  case HARM_MODE:
-    if (status.potChanged[POT_0] == true) {
+}
+void Controller::update_HARM_MODE(void)
+{
+      if (status.potChanged[POT_0] == true) {
       // get 2 MSB for three options (Root, Step, All notes off)
       mode.pointer = status.potValue[POT_0]>>5; 
     }
@@ -243,9 +308,9 @@ void Controller::updateMode(extFlags_t flags)
         mode.allNotesOff = true;
       }
     }
-    break; 
-
-  case GEN:
+}
+void Controller::update_GEN(void)
+{
     if (status.potChanged[POT_0] == true) {
       // get 2 MSB for three options (main, volume, detune, pan spread)
       mode.pointer = status.potValue[POT_0]>>5; 
@@ -279,15 +344,13 @@ void Controller::updateMode(extFlags_t flags)
           if (mode.option > 96) mode.option = 96;
           mode.divisor = mode.option;
           mode.updateSeq = true;
-          //mode.tempo = mode.option + BASE_TEMPO;
-          //mode.millisPerTick = 60000/(mode.tempo*TICKS_PER_BEAT);
-          //mode.tempoChange = true;
           break;
       }
     }
-    break;
+}
 
-  case MIX:
+void Controller::update_MIX(void)
+{
     if (status.potChanged[POT_0] == true) {
       mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB (4 voices)
     }
@@ -298,9 +361,10 @@ void Controller::updateMode(extFlags_t flags)
       program.voiceVol[mode.pointer] = mode.option;
       program.update = true; 
     }
-    break;
+}
 
-  case CHORUS:
+void Controller::update_CHORUS(void)
+{
     // This menu is different: one pointer selects voice, a second one
     // selects the parameter and the third/fourth selects the value
     if (status.potChanged[POT_0] == true) {
@@ -325,11 +389,11 @@ void Controller::updateMode(extFlags_t flags)
         else if (mode.fxParam == CHORUS_DEPTH) { program.chorusDepth[mode.option] = mode.value; } 
         program.update = true; // only update program when new value is entered
       }
-      
     }
-    break;
+}
 
-  case REVERB:
+void Controller::update_REVERB(void)
+{
     // This menu is different: one pointer selects voice, a second one
     // selects the parameter and the third/fourth selects the value
     if (status.potChanged[POT_0] == true) {
@@ -353,58 +417,4 @@ void Controller::updateMode(extFlags_t flags)
       }
       
     }
-    break;
-
-  default:
-    break;
-  
-  } // switch(mode.menu)
-
-  // scroll the menu
-  if(status.buttonChanged[BUTTON_0] && status.buttonValue[BUTTON_0]) {
-    mode.menu = mode.menu+1;
-    mode.menuChanged = true;
-  }
-  if(status.buttonChanged[BUTTON_2] && status.buttonValue[BUTTON_2]) {
-    mode.menu = mode.menu-1;
-    mode.menuChanged = true;
-  }
-  if (mode.menu == last) mode.menu = 0;
-  if (mode.menu < 0) mode.menu = last-1;
-
-
-  // transport machine
-  // transport machine uses button 2 for (PASE/STOP) and (PLAY)
-  /*
-  Commented out because transport is being handled with external MIDI
-  if(status.buttonChanged[BUTTON_2]) //} && status.buttonValue[BUTTON_0])
-  {
-    switch (mode.trans)
-    {
-      case STOP:
-        if (status.buttonValue[BUTTON_2]) mode.trans = PLAY;
-        break;
-
-      case PAUSE:
-        if (!status.buttonValue[BUTTON_2])
-            mode.trans = STOP;
-        break;
-
-      case PLAY:
-        if (status.buttonValue[BUTTON_2]) mode.trans = PAUSE;
-        break;
-    }
-  }
-  */
-
-}
-
-int Controller::getMillisPerTick(void) 
-{
-  if (mode.tempoChange) {
-    mode.tempoChange = false;
-    return mode.millisPerTick;
-  } else {
-    return 0;
-  }
 }

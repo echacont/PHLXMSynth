@@ -90,7 +90,7 @@
 #define DEFAULT_REVERB_FDBK         0x40
 
 // enumerated types
-enum mode_e { PC, GEN, MIX, SEQ, HARM_MODE, SEQ_MODE, CHORUS, REVERB, last };
+enum mode_e { GEN, HARM_MODE, PC, MIX, SEQ, SEQ_MODE, CHORUS, REVERB, last };
 enum transport_e { STOP, PLAY, PAUSE };
 //enum reverb_parameter_e { VOL, PROG, DELAY, FEEDB, RATE, DEPTH, last };
 // sequencer modes
@@ -107,12 +107,10 @@ typedef struct controllerStatus controllerStatus_t;
 struct controllerMode {
   mode_e menu;
   transport_e trans;
-  // these ones might be doomed
-  int tempo;
-  int millisPerTick;
-  bool tempoChange;
-  // Ext MIDI tick divisor
-  int divisor;
+
+  // External MIDI input
+  int root;     // input note
+
   // user interface
   bool updateSeq;
   bool menuChanged;
@@ -123,13 +121,18 @@ struct controllerMode {
   int fxParam;
   int fxValue;
   int arpMode;
+  
+  // can't this go into the sequencer?
   int numChordNotes;
   int chordStep;
+  int divisor;    // Ext MIDI tick divisor
+
   int spread;     // unison detune using midi note bend
   int panspread;
-  // "MIDI input"
-  int root;     // input note
-  // user sequence
+
+
+  // user control sequence
+  // TODO: this could modulate something else????
   int pSeq[NUM_STEPS0];
 }; 
 typedef struct controllerMode controllerMode_t;
@@ -157,21 +160,28 @@ struct Program_s
 typedef struct Program_s synthProgram_t;
 
 struct sequencerState {
+  // sequencer variables are data that needs to change per MIDI clock
+  // also needed to generate step sequence structures, because this data
+  // is used and interpreted by sequencer methods
   transport_e trans;
   sq_mode_e mode;
-  int tempo;  // rename to bpm
+  int voices;
   int root;
+
   int chordStep;
   int numChordNotes;
-  int voices;
-  int spread;     // detune, total range 1024, middle is  512
-  int panspread;
-  int millisPerTick;
+
+  // time division
+  int divisor;    // ticks per step
   int currentTick;
   int currentStep;
-  int divisor;
+
   int8_t seqCycles;
   int8_t notesPlayed;
+
+  // can't these go into the synthProgram struct?
+  int spread;     // detune, total range 1024, middle is  512
+  int panspread;
 };
 typedef struct sequencerState sequencerState_t;
 

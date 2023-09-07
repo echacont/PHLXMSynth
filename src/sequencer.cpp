@@ -179,8 +179,7 @@ void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
 
   // transport
   state.trans = mode.trans;
-  // tempo bpm
-  //if (mode.tempoChange) state.tempo = mode.tempo;
+
   switch(state.trans)
   {
     case PLAY:

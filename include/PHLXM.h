@@ -26,7 +26,15 @@ class Controller
   Controller(void);
   void updateStatus(void);        // see what input is being applied
   void updateMode(extFlags_t);   // with the input, what is being controlled?
-  int getMillisPerTick(void);
+  // update controller functions
+  void update_PC(void);
+  void update_SEQ(void);
+  void update_SEQ_MODE(void);
+  void update_HARM_MODE(void);
+  void update_GEN(void);
+  void update_MIX(void);
+  void update_CHORUS(void);
+  void update_REVERB(void);
 };
 
 // PHLXM - top system class

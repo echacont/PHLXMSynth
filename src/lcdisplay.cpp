@@ -24,126 +24,60 @@ void Lcdisp::update(synthProgram_t program,
                     sequencerState_t state,
                     fineStepSequence tseq)
 {
-  home();
   if (mode.menuChanged) clear();
-
+  home();
   switch(mode.menu)
-  {         /*  LCD columns  */
-    case PC:/*123456789012345*/
-      print("Prog"); //write(LCD_SPACE_SYMBOL);
-      setCursor(5,0);
-      for (int i=0; i<NUM_UNISON_VOICES; i++) {
-        write(LCD_0_SYMBOL+i+1);
-        printPointer(mode.pointer, i, 6+i*3, 0);
-        write(LCD_SPACE_SYMBOL);
-      }
-      setCursor(2,1);
-      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
-      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
-      for (int i=0; i<NUM_UNISON_VOICES; i++) {
-        setCursor(5+i*3,1);
-        print(program.voiceProgram[i], HEX); write(LCD_SPACE_SYMBOL);
-      }
+  {
+    case PC: 
+      display_PC(program, mode);
       break;
-
-    case GEN:
-      setCursor(3,0); print("Vol");
-      setCursor(7,0); print("Dt");
-      setCursor(10,0); print("Pn");
-      setCursor(13,0); print("Div");
-      setCursor(0,1);
-      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
-      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
-      printPointer(mode.pointer, 0, 3, 1);
-      print(program.masterVol, HEX);
-      printPointer(mode.pointer, 1, 7, 1);
-      print(state.spread>>6, HEX);
-      printPointer(mode.pointer, 2, 10, 1);
-      print(program.panspread>>4, HEX);
-      printPointer(mode.pointer, 3, 13, 1);
-      print(state.divisor, HEX); write(LCD_SPACE_SYMBOL);
+    case GEN: 
+      display_GEN(program, mode, state);
       break;
-
-    case HARM_MODE:
-      print ("H_M");
-      setCursor(4,0);
-      print("Root");
-      setCursor(9,0);
-      print("St");
-      setCursor(12,0);
-      print("Nn");
-      setCursor(15,0);
-      print("O");
-      // TODO print the root note (A,A#,B,C,C#,D,D#,E,F,F#,G,G#)
-      setCursor(0,1);
-      if (mode.option>99)  print(mode.option);
-      else if (mode.option>9) { write(LCD_SPACE_SYMBOL); print(mode.option); }
-      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(mode.option);  }
-      setCursor(3,1); write(LCD_RIGHT_SYMBOL);
-      printPointer(mode.pointer, 0, 4, 1);
-      if (state.root>99)  print(state.root);
-      else if (state.root>9) { write(LCD_SPACE_SYMBOL); print(state.root); }
-      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(state.root);  }
-      printPointer(mode.pointer, 1, 9, 1);
-      setCursor(10,1);
-      print(state.chordStep);
-      printPointer(mode.pointer, 2, 12, 1);
-      print(state.numChordNotes,HEX);
-      printPointer(mode.pointer, 3, 15, 1);
+    case HARM_MODE: 
+      display_HARM_MODE(mode, state);
       break;
-
-    case SEQ:
-      print("Step"); write(LCD_SPACE_SYMBOL);
-      setCursor(6,0);
-      for (int i=0; i<NUM_STEPS0; i++)
-        write(LCD_0_SYMBOL+mode.pSeq[i]);
-      setCursor(15,0);write(LCD_0_SYMBOL+state.currentStep+1);
-      setCursor(0,1);
-      print(state.currentTick);  write(LCD_SPACE_SYMBOL);
-      setCursor(3,1);
-      if (tseq.onSeq[state.currentTick] > 0) print(tseq.onSeq[state.currentTick], HEX);  write(LCD_SPACE_SYMBOL);
-      setCursor(6,1);
-      for (int i=0; i<NUM_STEPS0; i++) 
-        printStepAndPointer(mode.pointer, state.currentStep, i, 6+i,1);
-      setCursor(14,1); 
-      write(LCD_LEFT_SYMBOL); write(LCD_0_SYMBOL+(mode.option));
+    case SEQ: 
+      display_SEQ(mode, state, tseq);
       break;
-
-    case SEQ_MODE:
-      print("SqM");
-      setCursor(4,0);
-      print("Mod");
-      setCursor(0,1);
-      if (mode.option>99)  print(mode.option);
-      else if (mode.option>9) { write(LCD_SPACE_SYMBOL); print(mode.option); }
-      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(mode.option);  }        
-      setCursor(3,1); write(LCD_RIGHT_SYMBOL);
-      printPointer(mode.pointer, 0, 4, 1);
-      setCursor(5,1); 
-      if (state.mode == CHORD) print("ch");
-      else if (state.mode == ARP1) print ("a1"); 
-      else if (state.mode == ARP2) print ("a2");      
+    case SEQ_MODE: 
+      display_SEQ_MODE(mode, state);
       break;
-
-
-    case MIX:
-      print("Mix");
-      setCursor(5,0);
-      for (int i=0; i<NUM_UNISON_VOICES; i++) {
-        write(LCD_0_SYMBOL+i+1);
-        printPointer(mode.pointer, i, 6+i*3, 0);
-        write(LCD_SPACE_SYMBOL);
-      }
-      setCursor(2,1);
-      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
-      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
-      for (int i=0; i<NUM_UNISON_VOICES; i++) {
-        setCursor(5+i*3,1);
-        print(program.voiceVol[i], HEX); write(LCD_SPACE_SYMBOL);
-      }
+    case MIX: 
+      display_MIX(mode, program);
       break;
+    case CHORUS: 
+      display_CHORUS(mode, program);
+      break;
+    case REVERB: 
+      display_REVERB(mode, program);
+      break;
+    default:
+      print("Rabit hole");
+      break;
+  }
+}
 
-    case CHORUS:
+/*--------------------------------------------------*/
+
+void Lcdisp::printPointer(int p, int i, int col, int row)
+{
+  setCursor(col, row);
+  if (i == p) write(LCD_STAR_SYMBOL);
+  else write(LCD_SPACE_SYMBOL);
+}
+
+void Lcdisp::printStepAndPointer(int p, int8_t s, int i, int col, int row)
+{
+  setCursor(col, row);
+  if (i == p) write(LCD_STAR_SYMBOL);
+  else if (i == s) write(LCD_SQUARE_SYMBOL);
+  else write(LCD_SPACE_SYMBOL);
+}
+
+
+void Lcdisp::display_CHORUS(controllerMode_t mode, synthProgram_t program)
+{
       print("Chr");
       setCursor(4,0);
       print("Vo");
@@ -214,9 +148,10 @@ void Lcdisp::update(synthProgram_t program,
         else {                                    print("--"); } 
       }
       write(LCD_SPACE_SYMBOL);
-      break; // case CHORUS
+}
 
-    case REVERB:
+void Lcdisp::display_REVERB(controllerMode_t mode, synthProgram_t program)
+{
       print("Rvb");
       setCursor(4,0);
       print("Vo");
@@ -272,28 +207,130 @@ void Lcdisp::update(synthProgram_t program,
         else {                                    print("--"); } 
       }
       write(LCD_SPACE_SYMBOL);
-
-      break; // case: REVERB
-
-    default:
-      print("Rabit hole");
-      break;
-  }
 }
 
-void Lcdisp::printPointer(int p, int i, int col, int row)
+void Lcdisp::display_MIX(controllerMode_t mode, synthProgram_t program)
 {
-  setCursor(col, row);
-  if (i == p) write(LCD_STAR_SYMBOL);
-  else write(LCD_SPACE_SYMBOL);
+      print("Mix");
+      setCursor(5,0);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        write(LCD_0_SYMBOL+i+1);
+        printPointer(mode.pointer, i, 6+i*3, 0);
+        write(LCD_SPACE_SYMBOL);
+      }
+      setCursor(2,1);
+      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
+      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        setCursor(5+i*3,1);
+        print(program.voiceVol[i], HEX); write(LCD_SPACE_SYMBOL);
+      }
 }
 
-void Lcdisp::printStepAndPointer(int p, int8_t s, int i, int col, int row)
+void Lcdisp::display_SEQ_MODE(controllerMode_t mode, sequencerState_t state)
 {
-  setCursor(col, row);
-  if (i == p) write(LCD_STAR_SYMBOL);
-  else if (i == s) write(LCD_SQUARE_SYMBOL);
-  else write(LCD_SPACE_SYMBOL);
+      print("SqM");
+      setCursor(4,0);
+      print("Mod");
+      setCursor(0,1);
+      if (mode.option>99)  print(mode.option);
+      else if (mode.option>9) { write(LCD_SPACE_SYMBOL); print(mode.option); }
+      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(mode.option);  }        
+      setCursor(3,1); write(LCD_RIGHT_SYMBOL);
+      printPointer(mode.pointer, 0, 4, 1);
+      setCursor(5,1); 
+      if (state.mode == CHORD) print("ch");
+      else if (state.mode == ARP1) print ("a1"); 
+      else if (state.mode == ARP2) print ("a2");   
 }
 
-/*--------------------------------------------------*/
+void Lcdisp::display_SEQ(controllerMode_t mode, sequencerState_t state, fineStepSequence tseq)
+{
+      print("Step"); write(LCD_SPACE_SYMBOL);
+      setCursor(6,0);
+      for (int i=0; i<NUM_STEPS0; i++)
+        write(LCD_0_SYMBOL+mode.pSeq[i]);
+      setCursor(15,0);write(LCD_0_SYMBOL+state.currentStep+1);
+      setCursor(0,1);
+      print(state.currentTick);  write(LCD_SPACE_SYMBOL);
+      setCursor(3,1);
+      if (tseq.onSeq[state.currentTick] > 0) print(tseq.onSeq[state.currentTick], HEX);  write(LCD_SPACE_SYMBOL);
+      setCursor(6,1);
+      for (int i=0; i<NUM_STEPS0; i++) 
+        printStepAndPointer(mode.pointer, state.currentStep, i, 6+i,1);
+      setCursor(14,1); 
+      write(LCD_LEFT_SYMBOL); write(LCD_0_SYMBOL+(mode.option));
+}
+
+
+void Lcdisp::display_HARM_MODE(controllerMode_t mode, sequencerState_t state)
+{
+   print ("H_M");
+      setCursor(4,0);
+      print("Root");
+      setCursor(9,0);
+      print("St");
+      setCursor(12,0);
+      print("Nn");
+      setCursor(15,0);
+      print("O");
+      // TODO print the root note (A,A#,B,C,C#,D,D#,E,F,F#,G,G#)
+      setCursor(0,1);
+      if (mode.option>99)  print(mode.option);
+      else if (mode.option>9) { write(LCD_SPACE_SYMBOL); print(mode.option); }
+      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(mode.option);  }
+      setCursor(3,1); write(LCD_RIGHT_SYMBOL);
+      printPointer(mode.pointer, 0, 4, 1);
+      if (state.root>99)  print(state.root);
+      else if (state.root>9) { write(LCD_SPACE_SYMBOL); print(state.root); }
+      else {  write(LCD_SPACE_SYMBOL); write(LCD_SPACE_SYMBOL); print(state.root);  }
+      printPointer(mode.pointer, 1, 9, 1);
+      setCursor(10,1);
+      print(state.chordStep);
+      printPointer(mode.pointer, 2, 12, 1);
+      print(state.numChordNotes,HEX);
+      printPointer(mode.pointer, 3, 15, 1);
+}
+
+void Lcdisp::display_PC(synthProgram_t program, 
+                         controllerMode_t mode)
+{
+      print("Prog"); //write(LCD_SPACE_SYMBOL);
+      setCursor(5,0);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        write(LCD_0_SYMBOL+i+1);
+        printPointer(mode.pointer, i, 6+i*3, 0);
+        write(LCD_SPACE_SYMBOL);
+      }
+      setCursor(2,1);
+      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
+      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
+      for (int i=0; i<NUM_UNISON_VOICES; i++) {
+        setCursor(5+i*3,1);
+        print(program.voiceProgram[i], HEX); write(LCD_SPACE_SYMBOL);
+      }
+
+}
+
+void Lcdisp::display_GEN(synthProgram_t program, 
+                         controllerMode_t mode, 
+                         sequencerState_t state)
+{
+      setCursor(3,0); print("Vol");
+      setCursor(7,0); print("Dt");
+      setCursor(10,0); print("Pn");
+      setCursor(13,0); print("Div");
+      setCursor(0,1);
+      if (mode.option<0x10)  write(LCD_SPACE_SYMBOL);
+      print(mode.option, HEX); write(LCD_RIGHT_SYMBOL);
+      printPointer(mode.pointer, 0, 3, 1);
+      print(program.masterVol, HEX);
+      printPointer(mode.pointer, 1, 7, 1);
+      print(state.spread>>6, HEX);
+      printPointer(mode.pointer, 2, 10, 1);
+      print(program.panspread>>4, HEX);
+      printPointer(mode.pointer, 3, 13, 1);
+      print(state.divisor, HEX); write(LCD_SPACE_SYMBOL);
+}
+
+
