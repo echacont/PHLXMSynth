@@ -7,11 +7,10 @@
 PHLXM::PHLXM(void)
 { }
 
-void PHLXM::run(extFlags_t flags)
+void PHLXM::run(extFlags_t* flags)
 {
   // last time I checked, run() takes around 100 ms to circle around
-  static bool toggle3 = false;
-  toggle3 = !toggle3; digitalWrite(53, toggle3);
+
   // right after the model constructors run at main::setup(), 
   // update synth program and sequencer state. Then get controller data, 
   // apply changes to models and come around again (and again and again....)
@@ -25,7 +24,7 @@ void PHLXM::run(extFlags_t flags)
               sq.tseq);
 
   contrl.updateStatus();   // reads controller into status (user input)
-  contrl.updateMode(flags);    // what needs to be done? Do it.
+  contrl.updateMode(flags, sqsp);    // what needs to be done? Do it.
 }
 
 /*--------------------------------------------------*/
@@ -60,9 +59,6 @@ Controller::Controller(void)
   mode.option = 0;
   mode.fxParam = 0;
   mode.fxValue = 0;
-  mode.root = DEFAULT_ROOT;
-  mode.chordStep = CHORD_STEP;
-  mode.numChordNotes = NUM_CHORD_NOTES;
   mode.arpMode = ARP1_MODE;
 
   int8_t initialPSeq[NUM_STEPS0] = {1,0,1,0,1,0,1,0};
@@ -71,10 +67,6 @@ Controller::Controller(void)
   mode.spread = UNISON_PITCH_SPREAD;
   // flags
   mode.menuChanged = true;
-  mode.updateSeq = true;
-  mode.allNotesOff = false;
-  // MIDI divisor
-  mode.divisor = MIDI_TICKS_PER_BEAT;
 
   // initialize a program
   // TODO put this into a constructor of its own
@@ -144,7 +136,7 @@ void Controller::updateStatus(void)
   }
 }
 
-void Controller::updateMode(extFlags_t flags)
+void Controller::updateMode(extFlags_t* flags, sequencerState_t* state)
 {
   // clear flags and reset pointer and option artifacts
   if (mode.menuChanged) {
@@ -153,8 +145,7 @@ void Controller::updateMode(extFlags_t flags)
     mode.menuChanged = false;
   }
   program.update = false;
-  mode.allNotesOff = false;
-  mode.updateSeq = false;
+  
 
   // state machine kinda
   switch (mode.menu)
@@ -167,17 +158,17 @@ void Controller::updateMode(extFlags_t flags)
       update_MIX();
       break;
     case SEQ:
-      update_SEQ();
+      update_SEQ(state);
       break;
     case SEQ_MODE:
-      update_SEQ_MODE();
+      update_SEQ_MODE(state);
       break;
     // TODO: HARM_MODE and GEN have controls that need to go in the same page
     case HARM_MODE:
-      update_HARM_MODE();
+      update_HARM_MODE(state);
       break; 
     case GEN:
-      update_GEN();
+      update_GEN(state);
       break;
     case CHORUS:
       update_CHORUS();
@@ -240,7 +231,7 @@ void Controller::update_PC(void)
     } 
 }
 
-void Controller::update_SEQ(void)
+void Controller::update_SEQ(sequencerState_t* state)
 {
     if (status.potChanged[POT_0] == true) {
       // get 3 MSB because sequencer has 8 steps
@@ -252,11 +243,11 @@ void Controller::update_SEQ(void)
     }
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
       mode.pSeq[mode.pointer] = mode.option;
-      mode.updateSeq = true;
+      state->updateSeq = true;
     }
 }
 
-void Controller::update_SEQ_MODE(void)
+void Controller::update_SEQ_MODE(sequencerState_t* state)
 {
       if (status.potChanged[POT_0] == true)
       mode.pointer = status.potValue[POT_0]>>5; // get 2 MSB 
@@ -268,12 +259,12 @@ void Controller::update_SEQ_MODE(void)
       if (mode.pointer == 0) { // ARP mode 
         if (mode.option < 3) {
           mode.arpMode = mode.option;
-          mode.updateSeq = true;
+          state->updateSeq = true;
         }
       }
     } 
 }
-void Controller::update_HARM_MODE(void)
+void Controller::update_HARM_MODE(sequencerState_t* state) 
 {
       if (status.potChanged[POT_0] == true) {
       // get 2 MSB for three options (Root, Step, All notes off)
@@ -293,23 +284,23 @@ void Controller::update_HARM_MODE(void)
     }
     if (status.buttonChanged[BUTTON_1] && status.buttonValue[BUTTON_1]) {
       if (mode.pointer == 0) {// ROot
-        mode.root = mode.option;
-        mode.updateSeq = true;
+        state->root = mode.option;
+        state->updateSeq = true;
       }
       if (mode.pointer == 1) {
-        mode.chordStep = mode.option;
-        mode.updateSeq = true;
+        state->chordStep = mode.option;
+        state->updateSeq = true;
       }
       if (mode.pointer == 2) {
-        mode.numChordNotes = mode.option;
-        mode.updateSeq = true;
+        state->numChordNotes = mode.option;
+        state->updateSeq = true;
       }
       if (mode.pointer == 3) {
-        mode.allNotesOff = true;
+        state->allNotesOff = true;
       }
     }
 }
-void Controller::update_GEN(void)
+void Controller::update_GEN(sequencerState_t* state)
 {
     if (status.potChanged[POT_0] == true) {
       // get 2 MSB for three options (main, volume, detune, pan spread)
@@ -334,7 +325,7 @@ void Controller::update_GEN(void)
         case 1: 
           // shift left 6 bits to get full bend range of 512
           mode.spread = mode.option<<6;
-          mode.updateSeq = true;
+          state->updateSeq = true;
           break;
         case 2:
           program.panspread = mode.option<<4;
@@ -342,8 +333,8 @@ void Controller::update_GEN(void)
           break;
         case 3: 
           if (mode.option > 96) mode.option = 96;
-          mode.divisor = mode.option;
-          mode.updateSeq = true;
+          state->divisor = mode.option;
+          state->updateSeq = true;
           break;
       }
     }

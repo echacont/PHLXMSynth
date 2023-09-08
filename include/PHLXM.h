@@ -25,13 +25,13 @@ class Controller
   // constructor
   Controller(void);
   void updateStatus(void);        // see what input is being applied
-  void updateMode(extFlags_t);   // with the input, what is being controlled?
+  void updateMode(extFlags_t*, sequencerState_t*);   // with the input, what is being controlled?
   // update controller functions
   void update_PC(void);
-  void update_SEQ(void);
-  void update_SEQ_MODE(void);
-  void update_HARM_MODE(void);
-  void update_GEN(void);
+  void update_SEQ(sequencerState_t*);
+  void update_SEQ_MODE(sequencerState_t*);
+  void update_HARM_MODE(sequencerState_t*);
+  void update_GEN(sequencerState_t*);
   void update_MIX(void);
   void update_CHORUS(void);
   void update_REVERB(void);
@@ -49,9 +49,11 @@ class PHLXM
   // Liquid Crystal Display
   Lcdisp disp;
 
+  sequencerState_t* sqsp = &sq.state;
+
   // constructor
   PHLXM(void);
-  void run(extFlags_t);
+  void run(extFlags_t*);
   void tick(void);
 };
 

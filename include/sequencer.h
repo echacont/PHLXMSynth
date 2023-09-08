@@ -44,7 +44,7 @@ class Sequencer : private Fluxamasynth
   Sequencer(void);
   void tick(void);
   void initFineSequence(int);
-  void updateSequencer(controllerMode_t mode, extFlags_t flags);
+  void updateSequencer(controllerMode_t mode, extFlags_t* flags);
   void progChange(synthProgram_t program);
   void playStep(int step);
   void playChord(int pitch, int numNotes, bool gate);

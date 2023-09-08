@@ -108,24 +108,14 @@ struct controllerMode {
   mode_e menu;
   transport_e trans;
 
-  // External MIDI input
-  int root;     // input note
-
   // user interface
-  bool updateSeq;
   bool menuChanged;
-  bool allNotesOff;
   int pointer;
   int value;
   int option;
   int fxParam;
   int fxValue;
   int arpMode;
-  
-  // can't this go into the sequencer?
-  int numChordNotes;
-  int chordStep;
-  int divisor;    // Ext MIDI tick divisor
 
   int spread;     // unison detune using midi note bend
   int panspread;
@@ -163,6 +153,9 @@ struct sequencerState {
   // sequencer variables are data that needs to change per MIDI clock
   // also needed to generate step sequence structures, because this data
   // is used and interpreted by sequencer methods
+  bool updateSeq;
+  bool allNotesOff;
+  
   transport_e trans;
   sq_mode_e mode;
   int voices;
@@ -170,6 +163,7 @@ struct sequencerState {
 
   int chordStep;
   int numChordNotes;
+  
 
   // time division
   int divisor;    // ticks per step

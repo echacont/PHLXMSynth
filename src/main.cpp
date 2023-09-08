@@ -51,6 +51,7 @@ void setup ()
   phlxm = new PHLXM();
   flags.updateDisplay = false;
   flags.runSequencerTick = false;
+  flags.updateSequence = true;
 
   // Initialize External MIDI
   //Serial.begin(31250);
@@ -76,14 +77,14 @@ void setup ()
 
 void loop () 
 {
-  phlxm->run(flags);
+  phlxm->run(&flags);
 };
 
 /*-------------------------------------------------------------------------*/
 
 void checkMIDI(void)
 {
-  
+  static bool toggle3 = false;
   while(MIDI.read())
   {
     switch(MIDI.getType())
@@ -108,9 +109,11 @@ void checkMIDI(void)
       // TODO: need to have a record of note event in the sequencer
       case midi::NoteOn:
         int incomingPitch = MIDI.getData1();  
-        if (incomingPitch != phlxm->contrl.mode.root) {
+        if (incomingPitch != phlxm->sq.state.root) {
           flags.updateSequence = true;
-          phlxm->contrl.mode.root = incomingPitch;
+          phlxm->sq.state.root = incomingPitch;
+          // 
+          toggle3 = !toggle3; digitalWrite(53, toggle3);
         }
         //MIDI.getData2();
         break;

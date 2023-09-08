@@ -10,6 +10,8 @@
 // sequencer constructor also calls base class constructor
 Sequencer::Sequencer(void) : Fluxamasynth()
 {
+  state.updateSeq = true;
+  state.allNotesOff = true;
   // some of this can be removed as state is updated from mode first thing after setup()
   state.trans = STOP;
   state.voices = NUM_UNISON_VOICES;
@@ -24,7 +26,6 @@ Sequencer::Sequencer(void) : Fluxamasynth()
   //state.mode = ARP1;
   
   for (int i=0; i<state.voices; i++) {
-    allNotesOff(i); 
     setChannelVolume(i, INITIAL_VOICE_VOL);  
     //pan(i,127-((i-state.voices/2)*state.panspread));
     setChorus(i, 0, 0, 0, 0 );
@@ -147,15 +148,12 @@ void Sequencer::playFineSequenceTick(int pitch)
 }
 
 
-void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
+void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t* flags)
 {
-  if (mode.updateSeq || flags.updateSequence) {
-    flags.updateSequence = false;
-    state.root = mode.root;
-    state.chordStep = mode.chordStep;
-    state.numChordNotes = mode.numChordNotes;
+  if (state.updateSeq || flags->updateSequence) {
+    state.updateSeq = false;
+    flags->updateSequence = false;
     state.spread = mode.spread;
-    state.divisor = mode.divisor;
 
         for (int i=0; i<NUM_STEPS0; i++) {
           // pSeq is scale degree based so 1 is root
@@ -173,9 +171,11 @@ void Sequencer::updateSequencer(controllerMode_t mode, extFlags_t flags)
     else   state.mode = ARP2;
   }
 
-  if (mode.allNotesOff) 
+  if (state.allNotesOff) {
+    state.allNotesOff = false;
     for(int i = 0; i < 16; i++)
       allNotesOff(i);
+  }
 
   // transport
   state.trans = mode.trans;
